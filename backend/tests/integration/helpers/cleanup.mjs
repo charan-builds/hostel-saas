@@ -1,48 +1,76 @@
 export const TENANT_TABLE_DELETE_ORDER = [
-  "notification_delivery_attempts",
-  "notification_recipients",
-  "notice_acknowledgements",
-  "notifications",
-  "notification_jobs",
-  "notification_preferences",
-  "notice_boards",
-  "visitor_pass_events",
-  "visitor_passes",
-  "gate_pass_events",
-  "gate_passes",
-  "attendance_records",
-  "student_leave_requests",
-  "student_presence_jobs",
-  "billing_receipts",
-  "billing_payment_allocations",
-  "billing_payments",
-  "billing_invoice_items",
-  "billing_invoices",
-  "billing_runs",
-  "billing_receipt_counters",
-  "billing_invoice_counters",
-  "rent_plans",
-  "student_documents",
-  "student_room_assignments",
-  "room_beds",
-  "rooms",
-  "room_templates",
-  "room_categories",
-  "hostel_floors",
-  "students",
-  "analytics_refresh_jobs",
-  "audit_logs",
-  "tenant_memberships",
-  "tenant_role_definitions",
-  "tenant_settings",
-  "user_profiles",
-  "hostel_branches",
-  "organizations",
+  { table: "notification_delivery_attempts", column: "organization_id" },
+  { table: "notification_recipients", column: "organization_id" },
+  { table: "notice_acknowledgements", column: "organization_id" },
+  { table: "notifications", column: "organization_id" },
+  { table: "notification_jobs", column: "organization_id" },
+  { table: "notification_preferences", column: "organization_id" },
+  { table: "notice_boards", column: "organization_id" },
+  { table: "visitor_pass_events", column: "organization_id" },
+  { table: "visitor_passes", column: "organization_id" },
+  { table: "gate_pass_events", column: "organization_id" },
+  { table: "gate_passes", column: "organization_id" },
+  { table: "attendance_records", column: "organization_id" },
+  { table: "student_leave_requests", column: "organization_id" },
+  { table: "student_presence_jobs", column: "organization_id" },
+  { table: "billing_receipts", column: "organization_id" },
+  { table: "billing_payment_allocations", column: "organization_id" },
+  { table: "billing_payments", column: "organization_id" },
+  { table: "billing_invoice_items", column: "organization_id" },
+  { table: "billing_invoices", column: "organization_id" },
+  { table: "billing_runs", column: "organization_id" },
+  { table: "billing_receipt_counters", column: "organization_id" },
+  { table: "billing_invoice_counters", column: "organization_id" },
+  { table: "rent_plans", column: "organization_id" },
+  { table: "student_documents", column: "organization_id" },
+  { table: "student_room_assignments", column: "organization_id" },
+  { table: "room_beds", column: "organization_id" },
+  { table: "rooms", column: "organization_id" },
+  { table: "room_templates", column: "organization_id" },
+  { table: "room_categories", column: "organization_id" },
+  { table: "hostel_floors", column: "organization_id" },
+  { table: "students", column: "organization_id" },
+  { table: "student_code_counters", column: "organization_id" },
+  { table: "analytics_refresh_jobs", column: "organization_id" },
+  { table: "audit_logs", column: "organization_id" },
+  { table: "tenant_memberships", column: "organization_id" },
+  { table: "tenant_role_definitions", column: "organization_id" },
+  { table: "tenant_settings", column: "organization_id" },
+  { table: "user_profiles", column: "organization_id" },
+  { table: "hostel_branches", column: "organization_id" },
+  { table: "organizations", column: "id" },
 ];
 
+async function assertIntegrationOrganization(admin, organizationId) {
+  const { data, error } = await admin
+    .from("organizations")
+    .select("id")
+    .eq("id", organizationId)
+    .contains("metadata", { integration_test: true })
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    throw new Error(
+      `Refusing to clean organization ${organizationId} because it is not marked as an integration fixture.`,
+    );
+  }
+}
+
 export async function deleteTenantData(admin, organizationId) {
-  for (const table of TENANT_TABLE_DELETE_ORDER) {
-    const { error } = await admin.from(table).delete().eq("organization_id", organizationId);
+  await assertIntegrationOrganization(admin, organizationId);
+
+  for (const { table, column } of TENANT_TABLE_DELETE_ORDER) {
+    let query = admin.from(table).delete().eq(column, organizationId);
+
+    if (table === "organizations") {
+      query = query.contains("metadata", { integration_test: true });
+    }
+
+    const { error } = await query;
 
     if (error) {
       throw new Error(`Failed to clean ${table}: ${error.message}`);
