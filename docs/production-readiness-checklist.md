@@ -2,12 +2,12 @@
 
 ## Required Before Launch
 
-- [ ] Apply all Supabase migrations through `20260516009000_production_hardening.sql`.
+- [ ] Apply all Supabase migrations through `20260517001000_move_citext_extension_schema.sql`.
 - [ ] Rotate any Supabase keys that were ever copied into `.env.example`, docs, prompts, logs, or chat output.
 - [ ] Keep `backend/.env.example` placeholder-only and run `pnpm repo:hygiene` before every release branch.
 - [ ] Configure `JOB_RUNNER_SECRET` before enabling internal worker HTTP entrypoints.
 - [ ] Verify payment retries return the original payment for the same idempotency key.
-- [ ] Run tenant isolation and RLS integration tests against a disposable Supabase project.
+- [ ] Run `pnpm test:integration:supabase` against a staging or disposable Supabase project.
 - [ ] Deploy an analytics worker that claims `analytics_refresh_jobs` and calls `perform_analytics_refresh_job`.
 - [ ] Add rate-limit backing storage before multi-instance production scale if in-memory limits are insufficient.
 - [ ] Configure structured log ingestion with `request_id`, tenant, branch, actor, event, and error fields.

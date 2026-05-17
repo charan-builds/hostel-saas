@@ -10,7 +10,8 @@ This project already contains the production SaaS backend architecture. These st
 - The private `student-documents` bucket is created by the students migration.
 - Signed student document uploads are tenant-scoped by path:
   `organization_id/hostel_branch_id/student_id/random-file-name`.
-- Integration tests are gated by `RUN_SUPABASE_INTEGRATION_TESTS=1`.
+- Integration tests are gated by `RUN_SUPABASE_INTEGRATION_TESTS=1` and a
+  non-production `SUPABASE_INTEGRATION_TARGET`.
 
 ## One Manual Step
 
@@ -29,6 +30,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your_publishable_key
 SUPABASE_SECRET_KEY=sb_secret_your_server_secret_key
 RUN_SUPABASE_INTEGRATION_TESTS=0
+SUPABASE_INTEGRATION_TARGET=staging
 LOG_LEVEL=info
 ```
 
@@ -39,6 +41,8 @@ SUPABASE_PROJECT_REF=your-project-ref
 SUPABASE_ACCESS_TOKEN=sbp_your_personal_access_token
 SUPABASE_DB_PASSWORD=your_database_password
 DATABASE_URL=postgresql://postgres:password@db.your-project-ref.supabase.co:5432/postgres
+SUPABASE_PRODUCTION_PROJECT_REF=your-production-project-ref
+# SUPABASE_CONFIRM_NON_PRODUCTION=1 # local-only bypass before production exists
 ```
 
 Keep server secrets unprefixed. Anything prefixed with `NEXT_PUBLIC_` is browser-visible in Next.js.
@@ -92,18 +96,26 @@ pnpm build
 pnpm test:integration
 ```
 
-To run the real Supabase integration suite, set `RUN_SUPABASE_INTEGRATION_TESTS=1` in `backend/.env.local`, then run:
+To run the real Supabase integration suite, use a staging or disposable
+Supabase project. Set `RUN_SUPABASE_INTEGRATION_TESTS=1` and
+`SUPABASE_INTEGRATION_TARGET=staging` in `backend/.env.local`, then run:
 
 ```bash
+pnpm verify:integration
+pnpm db:test:reset
+pnpm db:test:seed
 pnpm test:integration:supabase
 ```
 
 The integration helpers load `backend/.env.local`. When
-`RUN_SUPABASE_INTEGRATION_TESTS=1`, missing or placeholder Supabase values fail
-the test run instead of silently skipping. Run those tests against a staging
-Supabase project or a disposable branch when possible. They verify tenant
-isolation, RLS, payment retries, room assignment race protection, and
-superadmin boundaries.
+`RUN_SUPABASE_INTEGRATION_TESTS=1`, missing or placeholder Supabase values,
+unsafe targets, and production project-ref matches fail the test run instead of
+silently skipping. Run those tests against a staging Supabase project or a
+disposable branch. They verify tenant isolation, RLS, payment retries, room
+assignment race protection, and superadmin boundaries.
+
+See `docs/supabase-integration-testing.md` for CI secrets, fixture cleanup, and
+local testing details.
 
 ## Storage Notes
 
@@ -111,4 +123,7 @@ The `student-documents` bucket is private and migration-managed. Uploads should 
 
 ## Local Supabase Config
 
-`backend/supabase/config.toml` exists so Supabase CLI commands can link and validate this app root. The local database major version is set to the CLI default of PostgreSQL 15. If your hosted Supabase project uses a newer major version, update `db.major_version` after checking the remote database with `SHOW server_version;`.
+`backend/supabase/config.toml` exists so Supabase CLI commands can link and
+validate this app root. The local database major version is currently set to
+PostgreSQL 17. Keep this aligned with the hosted Supabase database major
+version after checking the remote database with `SHOW server_version;`.

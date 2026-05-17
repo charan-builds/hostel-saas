@@ -53,9 +53,17 @@ pnpm build
 pnpm test:integration
 ```
 
-`pnpm test:integration` runs contract tests with live Supabase tests skipped.
+`pnpm test:integration` runs the integration contract suite with real Supabase
+calls skipped. Real database tests require an explicit non-production target:
+
+```bash
+RUN_SUPABASE_INTEGRATION_TESTS=1 SUPABASE_INTEGRATION_TARGET=staging pnpm test:integration:supabase
+```
+
 Use `pnpm test:integration:supabase` only against a staging or disposable
-Supabase project.
+Supabase project. Use `pnpm test:integration:local` for a local Supabase stack.
+GitHub Actions runs the real staging lane on pushes to `main` or manual
+workflow dispatch after the staging secrets are configured.
 
 ## Supabase Setup
 
@@ -72,6 +80,8 @@ pnpm types:db
 
 Full hosted-project setup lives in
 [`docs/supabase-real-project-setup.md`](docs/supabase-real-project-setup.md).
+The real integration-test strategy lives in
+[`docs/supabase-integration-testing.md`](docs/supabase-integration-testing.md).
 
 ## Production Notes
 

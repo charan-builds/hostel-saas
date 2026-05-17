@@ -22,9 +22,13 @@
     "db:push": "pnpm --dir backend db:push",
     "db:lint": "pnpm --dir backend db:lint",
     "types:db": "pnpm --dir backend types:db",
+    "verify:integration": "pnpm --dir backend verify:integration",
+    "db:test:reset": "pnpm --dir backend db:test:reset",
+    "db:test:seed": "pnpm --dir backend db:test:seed",
     "setup:supabase": "pnpm --dir backend setup:supabase",
     "test:integration": "pnpm --dir backend test:integration",
     "test:integration:supabase": "pnpm --dir backend test:integration:supabase",
+    "test:integration:local": "pnpm --dir backend test:integration:local",
     "typecheck": "pnpm --dir backend typecheck"
   }
 }

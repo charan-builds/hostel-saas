@@ -5,8 +5,86 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      run_supabase_integration:
+        description: Run the staging Supabase integration lane.
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
 
 jobs:
+  supabase-integration-plan:
+    name: Supabase integration plan
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.plan.outputs.should_run }}
+      reason: ${{ steps.plan.outputs.reason }}
+    env:
+      IS_FORK_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+      IS_MAIN_PUSH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      IS_MANUAL_REQUEST: ${{ github.event_name == 'workflow_dispatch' && inputs.run_supabase_integration }}
+      SUPABASE_STAGING_URL: ${{ secrets.SUPABASE_STAGING_URL }}
+      SUPABASE_STAGING_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
+      SUPABASE_STAGING_SECRET_KEY: ${{ secrets.SUPABASE_STAGING_SECRET_KEY }}
+      SUPABASE_STAGING_ACCESS_TOKEN: ${{ secrets.SUPABASE_STAGING_ACCESS_TOKEN }}
+      SUPABASE_STAGING_PROJECT_REF: ${{ secrets.SUPABASE_STAGING_PROJECT_REF }}
+      SUPABASE_STAGING_DB_PASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+      SUPABASE_PRODUCTION_PROJECT_REF: ${{ secrets.SUPABASE_PRODUCTION_PROJECT_REF }}
+    steps:
+      - name: Decide staging integration execution
+        id: plan
+        run: |
+          should_run=false
+          reason="skipped: staging integration runs on push to main or manual workflow dispatch"
+
+          if [ "$IS_FORK_PR" = "true" ]; then
+            reason="skipped: fork pull requests do not receive staging Supabase secrets"
+          elif [ "$IS_MAIN_PUSH" = "true" ] || [ "$IS_MANUAL_REQUEST" = "true" ]; then
+            should_run=true
+            reason="will run: trusted staging integration context"
+          fi
+
+          if [ "$should_run" = "true" ]; then
+            missing=()
+
+            for name in \
+              SUPABASE_STAGING_URL \
+              SUPABASE_STAGING_PUBLISHABLE_KEY \
+              SUPABASE_STAGING_SECRET_KEY \
+              SUPABASE_STAGING_ACCESS_TOKEN \
+              SUPABASE_STAGING_PROJECT_REF \
+              SUPABASE_STAGING_DB_PASSWORD \
+              SUPABASE_PRODUCTION_PROJECT_REF
+            do
+              if [ -z "${!name}" ]; then
+                missing+=("$name")
+              fi
+            done
+
+            if [ "${#missing[@]}" -gt 0 ]; then
+              {
+                echo "### Supabase staging integration cannot run"
+                echo
+                echo "Missing required secret(s):"
+                printf -- "- %s\n" "${missing[@]}"
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+          fi
+
+          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Supabase staging integration plan"
+            echo
+            echo "- should_run: \`$should_run\`"
+            echo "- reason: $reason"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   backend:
     name: Backend checks
     runs-on: ubuntu-latest
@@ -77,3 +155,91 @@ jobs:
 
       - name: Integration test contracts
         run: pnpm test:integration
+
+  supabase-integration:
+    name: Supabase staging integration
+    runs-on: ubuntu-latest
+    needs:
+      - backend
+      - supabase-integration-plan
+    if: needs.supabase-integration-plan.outputs.should_run == 'true'
+    timeout-minutes: 30
+    concurrency:
+      group: supabase-staging-integration
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_STAGING_PUBLISHABLE_KEY }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_STAGING_SECRET_KEY }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_STAGING_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_STAGING_PROJECT_REF }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+      SUPABASE_PRODUCTION_PROJECT_REF: ${{ secrets.SUPABASE_PRODUCTION_PROJECT_REF }}
+      SUPABASE_INTEGRATION_TARGET: staging
+      RUN_SUPABASE_INTEGRATION_TESTS: "1"
+      SUPABASE_CLI_PREFER_GLOBAL: "1"
+      LOG_LEVEL: silent
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v2
+        with:
+          version: 2.98.2
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate staging secrets
+        run: |
+          test -n "$NEXT_PUBLIC_SUPABASE_URL"
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+          test -n "$SUPABASE_SECRET_KEY"
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          test -n "$SUPABASE_PROJECT_REF"
+          test -n "$SUPABASE_DB_PASSWORD"
+          test -n "$SUPABASE_PRODUCTION_PROJECT_REF"
+
+      - name: Verify Supabase integration target
+        run: pnpm verify:integration
+
+      - name: Link staging Supabase project
+        run: pnpm supabase:link
+
+      - name: Supabase DB lint
+        run: pnpm db:lint
+
+      - name: Supabase migration dry run
+        run: pnpm db:push:dry-run
+
+      - name: Apply staging migrations
+        run: pnpm db:push
+
+      - name: Supabase type generation drift check
+        run: pnpm types:db && git diff --exit-code types/database.types.ts
+
+      - name: Reset stale integration fixtures
+        run: pnpm db:test:reset
+
+      - name: Verify integration fixture seeding
+        run: pnpm db:test:seed
+
+      - name: Run real Supabase integration tests
+        run: pnpm test:integration:supabase
