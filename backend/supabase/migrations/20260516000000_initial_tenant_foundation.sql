@@ -1,5 +1,7 @@
 create extension if not exists "pgcrypto";
-create extension if not exists "citext";
+create schema if not exists extensions;
+create extension if not exists "citext" with schema extensions;
+alter extension "citext" set schema extensions;
 
 create schema if not exists private;
 
@@ -24,7 +26,7 @@ $$;
 create table if not exists public.organizations (
   id uuid primary key default gen_random_uuid(),
   name text not null check (char_length(trim(name)) between 2 and 120),
-  slug citext not null,
+  slug extensions.citext not null,
   status text not null default 'active' check (status in ('active', 'suspended', 'archived')),
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
@@ -47,7 +49,7 @@ create table if not exists public.hostel_branches (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete restrict,
   name text not null check (char_length(trim(name)) between 2 and 120),
-  slug citext not null,
+  slug extensions.citext not null,
   code text,
   timezone text not null default 'UTC',
   address jsonb not null default '{}'::jsonb,
@@ -76,7 +78,7 @@ create table if not exists public.user_profiles (
   hostel_branch_id uuid,
   role public.app_role not null default 'student',
   full_name text not null check (char_length(trim(full_name)) between 2 and 160),
-  email citext not null,
+  email extensions.citext not null,
   phone text,
   avatar_url text,
   locale text not null default 'en',
