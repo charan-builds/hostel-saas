@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import { deleteTenantData } from "./cleanup.mjs";
+
 export const TEST_PASSWORD = "Integration-test-password-2026!";
 
 function slug(prefix) {
@@ -262,35 +264,7 @@ export async function cleanupTenant(admin, tenant) {
     tenant.superadminUser?.id,
   ].filter(Boolean);
 
-  const tables = [
-    "billing_receipts",
-    "billing_payment_allocations",
-    "billing_payments",
-    "billing_invoice_items",
-    "billing_invoices",
-    "billing_runs",
-    "billing_receipt_counters",
-    "billing_invoice_counters",
-    "student_room_assignments",
-    "room_beds",
-    "rooms",
-    "room_templates",
-    "room_categories",
-    "hostel_floors",
-    "students",
-    "analytics_refresh_jobs",
-    "audit_logs",
-    "tenant_memberships",
-    "tenant_role_definitions",
-    "tenant_settings",
-    "user_profiles",
-    "hostel_branches",
-    "organizations",
-  ];
-
-  for (const table of tables) {
-    await admin.from(table).delete().eq("organization_id", organizationId);
-  }
+  await deleteTenantData(admin, organizationId);
 
   for (const userId of userIds) {
     await admin.auth.admin.deleteUser(userId);

@@ -22,9 +22,13 @@
     "db:push": "node scripts/run-supabase-cli.mjs db push",
     "db:lint": "node scripts/run-supabase-cli.mjs db lint --linked",
     "types:db": "node scripts/generate-supabase-types.mjs",
+    "verify:integration": "node scripts/verify-integration-env.mjs",
+    "db:test:reset": "RUN_SUPABASE_INTEGRATION_TESTS=1 node scripts/integration-test-db.mjs cleanup",
+    "db:test:seed": "RUN_SUPABASE_INTEGRATION_TESTS=1 node scripts/integration-test-db.mjs seed",
     "setup:supabase": "pnpm verify:supabase && pnpm migrations:check && pnpm supabase:link && pnpm db:push:dry-run && pnpm types:db",
-    "test:integration": "node --test tests/integration/**/*.test.mjs",
-    "test:integration:supabase": "RUN_SUPABASE_INTEGRATION_TESTS=1 node --test tests/integration/**/*.test.mjs",
+    "test:integration": "node scripts/run-integration-tests.mjs --contracts",
+    "test:integration:supabase": "node scripts/run-integration-tests.mjs --supabase",
+    "test:integration:local": "node scripts/run-integration-tests.mjs --local",
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {

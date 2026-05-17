@@ -13,6 +13,7 @@ pnpm dev
 pnpm build
 pnpm lint
 pnpm typecheck
+pnpm test:integration
 ```
 
 The repository root keeps prompts and wrapper scripts only. Runtime files such as `app/`, `lib/`, `types/`, `supabase/`, `proxy.ts`, `next.config.ts`, and `tsconfig.json` live here so Next.js 16 and Turbopack resolve from one clean project root.
@@ -36,3 +37,25 @@ then fall back to `supabase` on `PATH`. Internal cron/worker HTTP entrypoints
 also require `JOB_RUNNER_SECRET` before they will execute.
 
 See `../docs/supabase-real-project-setup.md` for the full hosted-project workflow.
+
+## Real Integration Tests
+
+The default integration command verifies the test contracts while keeping live
+Supabase calls skipped:
+
+```bash
+pnpm test:integration
+```
+
+Real RLS/RPC/payment/race-condition tests require a non-production target:
+
+```bash
+SUPABASE_INTEGRATION_TARGET=staging pnpm verify:integration
+SUPABASE_INTEGRATION_TARGET=staging pnpm db:test:reset
+SUPABASE_INTEGRATION_TARGET=staging pnpm db:test:seed
+SUPABASE_INTEGRATION_TARGET=staging pnpm test:integration:supabase
+```
+
+Use `pnpm test:integration:local` when `.env.local` points at a local Supabase
+stack. CI uses a dedicated staging/disposable project and refuses to run when
+the configured project matches `SUPABASE_PRODUCTION_PROJECT_REF`.

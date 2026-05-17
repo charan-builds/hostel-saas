@@ -71,6 +71,14 @@ export function extractProjectRef(supabaseUrl) {
 }
 
 export function resolveSupabaseCliCommand(cwd = process.cwd()) {
+  if (process.env.SUPABASE_CLI_PATH) {
+    return process.env.SUPABASE_CLI_PATH;
+  }
+
+  if (process.env.SUPABASE_CLI_PREFER_GLOBAL === "1") {
+    return "supabase";
+  }
+
   const candidates =
     process.platform === "win32"
       ? [
