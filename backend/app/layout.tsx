@@ -1,0 +1,24 @@
+import type { Metadata } from "next";
+
+import { AppProviders } from "@/components/providers/app-providers";
+
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Hostel ERP",
+  description: "Multi-tenant Hostel ERP SaaS",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className="h-full antialiased">
+      <body className="flex min-h-full flex-col">
+        <AppProviders>{children}</AppProviders>
+      </body>
+    </html>
+  );
+}

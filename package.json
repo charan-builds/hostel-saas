@@ -1,0 +1,30 @@
+{
+  "name": "hostel-erp",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": ">=20.9.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --dir backend dev",
+    "build": "pnpm --dir backend build",
+    "start": "pnpm --dir backend start",
+    "lint": "pnpm --dir backend lint",
+    "runtime:check": "pnpm --dir backend runtime:check",
+    "repo:hygiene": "pnpm --dir backend repo:hygiene",
+    "verify:supabase": "pnpm --dir backend verify:supabase",
+    "migrations:check": "pnpm --dir backend migrations:check",
+    "supabase:link": "pnpm --dir backend supabase:link",
+    "supabase:status": "pnpm --dir backend supabase:status",
+    "db:push:dry-run": "pnpm --dir backend db:push:dry-run",
+    "db:push": "pnpm --dir backend db:push",
+    "db:lint": "pnpm --dir backend db:lint",
+    "types:db": "pnpm --dir backend types:db",
+    "setup:supabase": "pnpm --dir backend setup:supabase",
+    "test:integration": "pnpm --dir backend test:integration",
+    "test:integration:supabase": "pnpm --dir backend test:integration:supabase",
+    "typecheck": "pnpm --dir backend typecheck"
+  }
+}
