@@ -3,29 +3,29 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f8fafc;
-  --foreground: #172033;
+  --background: #faf9f6;
+  --foreground: #2d2a26;
   --card: #ffffff;
-  --card-foreground: #172033;
+  --card-foreground: #2d2a26;
   --popover: #ffffff;
-  --popover-foreground: #172033;
-  --primary: #14532d;
-  --primary-foreground: #f8fafc;
-  --secondary: #eef2f7;
-  --secondary-foreground: #1f2937;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #ecfdf5;
-  --accent-foreground: #14532d;
-  --destructive: #b91c1c;
-  --destructive-foreground: #fff7ed;
-  --border: #dbe3ef;
-  --input: #dbe3ef;
-  --ring: #15803d;
-  --success: #15803d;
-  --warning: #b45309;
-  --info: #0369a1;
-  --radius: 0.5rem;
+  --popover-foreground: #2d2a26;
+  --primary: #4a5d4e;
+  --primary-foreground: #ffffff;
+  --secondary: #e6e2dd;
+  --secondary-foreground: #2d2a26;
+  --muted: #f3f0eb;
+  --muted-foreground: #73706c;
+  --accent: #d4af37;
+  --accent-foreground: #ffffff;
+  --destructive: #9b3d35;
+  --destructive-foreground: #ffffff;
+  --border: #e6e2dd;
+  --input: #e6e2dd;
+  --ring: #4a5d4e;
+  --success: #4a5d4e;
+  --warning: #d4af37;
+  --info: #3b5998;
+  --radius: 0.25rem;
 }
 
 @theme inline {
@@ -60,28 +60,28 @@
 }
 
 .dark {
-  --background: #111827;
-  --foreground: #f8fafc;
-  --card: #182235;
-  --card-foreground: #f8fafc;
-  --popover: #182235;
-  --popover-foreground: #f8fafc;
-  --primary: #22c55e;
-  --primary-foreground: #052e16;
-  --secondary: #243047;
-  --secondary-foreground: #e5e7eb;
-  --muted: #1f2937;
-  --muted-foreground: #94a3b8;
-  --accent: #163524;
-  --accent-foreground: #bbf7d0;
-  --destructive: #ef4444;
-  --destructive-foreground: #fff7ed;
-  --border: #334155;
-  --input: #334155;
-  --ring: #22c55e;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --info: #38bdf8;
+  --background: #1f1e1c;
+  --foreground: #f3f0eb;
+  --card: #2d2a26;
+  --card-foreground: #f3f0eb;
+  --popover: #2d2a26;
+  --popover-foreground: #f3f0eb;
+  --primary: #6c8070;
+  --primary-foreground: #ffffff;
+  --secondary: #3b3834;
+  --secondary-foreground: #e6e2dd;
+  --muted: #3b3834;
+  --muted-foreground: #a6a29e;
+  --accent: #e5c158;
+  --accent-foreground: #1f1e1c;
+  --destructive: #d45f55;
+  --destructive-foreground: #ffffff;
+  --border: #3b3834;
+  --input: #3b3834;
+  --ring: #6c8070;
+  --success: #6c8070;
+  --warning: #e5c158;
+  --info: #4f74c8;
 }
 
 * {

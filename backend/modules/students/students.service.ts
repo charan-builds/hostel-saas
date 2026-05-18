@@ -6,6 +6,12 @@ import { recordAuditEvent } from "@/lib/audit/log";
 import { requirePermission } from "@/lib/auth/guards";
 import { buildOrIlikeFilter } from "@/lib/db/postgrest-filters";
 import { AppError } from "@/lib/http/errors";
+import { logger } from "@/lib/logger";
+import { verifyStudentDocumentUpload } from "@/lib/storage/storage-verification";
+import {
+  STUDENT_DOCUMENT_BUCKET,
+  UploadVerificationError,
+} from "@/lib/storage/upload-validation";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Json } from "@/types/database.types";
@@ -93,6 +99,24 @@ function mapDatabaseError(error: { code?: string; message?: string }) {
     statusCode: 500,
     expose: false,
   });
+}
+
+function toJsonObject(value: Json): { [key: string]: Json | undefined } {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value;
+  }
+
+  return {};
+}
+
+function toSerializableJson(value: unknown): Json {
+  try {
+    return JSON.parse(JSON.stringify(value ?? {})) as Json;
+  } catch {
+    return {
+      serialization_error: "Upload verification details were not JSON-safe.",
+    };
+  }
 }
 
 export async function listStudents(input: ListStudentsQuery) {
@@ -396,7 +420,7 @@ export async function createStudentDocumentUpload(
     `${randomUUID()}-${sanitizeFileName(input.fileName)}`,
   ].join("/");
   const { data: uploadData, error: uploadError } = await adminClient.storage
-    .from("student-documents")
+    .from(STUDENT_DOCUMENT_BUCKET)
     .createSignedUploadUrl(storagePath);
 
   if (uploadError) {
@@ -419,7 +443,7 @@ export async function createStudentDocumentUpload(
       organization_id: student.organization_id,
       size_bytes: input.sizeBytes,
       status: "pending",
-      storage_bucket: "student-documents",
+      storage_bucket: STUDENT_DOCUMENT_BUCKET,
       storage_path: storagePath,
       student_id: student.id,
       uploaded_by: context.identity.userId,
@@ -459,35 +483,150 @@ export async function completeStudentDocumentUpload(
     product: "hostel_erp",
   });
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
+  const adminClient = createSupabaseAdminClient();
+  const { data: document, error: documentError } = await supabase
     .from("student_documents")
-    .update({
-      status: "uploaded",
-      updated_by: context.identity.userId,
-    })
+    .select("*")
     .eq("id", input.documentId)
     .eq("student_id", student.id)
     .eq("organization_id", student.organization_id)
     .eq("hostel_branch_id", student.hostel_branch_id)
     .is("deleted_at", null)
-    .select("*")
     .single();
 
-  if (error) {
-    throw mapDatabaseError(error);
+  if (documentError) {
+    throw mapDatabaseError(documentError);
   }
 
-  await recordAuditEvent({
-    action: "student_document.upload_completed",
-    actorUserId: context.identity.userId,
-    durable: true,
-    entityId: data.id,
-    entityTable: "student_documents",
-    hostelBranchId: student.hostel_branch_id,
-    organizationId: student.organization_id,
-  });
+  try {
+    const verification = await verifyStudentDocumentUpload({
+      bucket: document.storage_bucket,
+      expectedMimeType: document.mime_type,
+      expectedSizeBytes: document.size_bytes,
+      hostelBranchId: student.hostel_branch_id,
+      organizationId: student.organization_id,
+      storagePath: document.storage_path,
+      studentId: student.id,
+      supabase: adminClient,
+    });
+    const checkedAt = new Date().toISOString();
+    const { data, error } = await supabase
+      .from("student_documents")
+      .update({
+        metadata: {
+          ...toJsonObject(document.metadata),
+          upload_verification: {
+            checked_at: checkedAt,
+            mime_type: verification.contentType,
+            size_bytes: verification.sizeBytes,
+            status: "passed",
+          },
+        },
+        mime_type: verification.contentType,
+        size_bytes: verification.sizeBytes,
+        status: "uploaded",
+        updated_by: context.identity.userId,
+      })
+      .eq("id", document.id)
+      .eq("student_id", student.id)
+      .eq("organization_id", student.organization_id)
+      .eq("hostel_branch_id", student.hostel_branch_id)
+      .is("deleted_at", null)
+      .select("*")
+      .single();
 
-  return data;
+    if (error) {
+      throw mapDatabaseError(error);
+    }
+
+    await recordAuditEvent({
+      action: "student_document.upload_completed",
+      actorUserId: context.identity.userId,
+      durable: true,
+      entityId: data.id,
+      entityTable: "student_documents",
+      hostelBranchId: student.hostel_branch_id,
+      metadata: {
+        mime_type: verification.contentType,
+        size_bytes: verification.sizeBytes,
+        storage_bucket: document.storage_bucket,
+        storage_path: document.storage_path,
+      },
+      organizationId: student.organization_id,
+    });
+
+    return data;
+  } catch (error) {
+    if (!(error instanceof UploadVerificationError)) {
+      throw error;
+    }
+
+    const checkedAt = new Date().toISOString();
+    const verificationDetails = toSerializableJson(error.details);
+    const { error: rejectionError } = await supabase
+      .from("student_documents")
+      .update({
+        metadata: {
+          ...toJsonObject(document.metadata),
+          upload_verification: {
+            checked_at: checkedAt,
+            details: verificationDetails,
+            error_code: error.code,
+            message: error.message,
+            status: "failed",
+          },
+        },
+        status: "rejected",
+        updated_by: context.identity.userId,
+      })
+      .eq("id", document.id)
+      .eq("student_id", student.id)
+      .eq("organization_id", student.organization_id)
+      .eq("hostel_branch_id", student.hostel_branch_id)
+      .is("deleted_at", null);
+
+    if (rejectionError) {
+      throw mapDatabaseError(rejectionError);
+    }
+
+    logger.warn(
+      {
+        actor_user_id: context.identity.userId,
+        branch_id: student.hostel_branch_id,
+        document_id: document.id,
+        error_code: error.code,
+        event_type: "student_document.upload_verification_failed",
+        storage_bucket: document.storage_bucket,
+        storage_path: document.storage_path,
+        student_id: student.id,
+        tenant_id: student.organization_id,
+      },
+      error.message,
+    );
+
+    await recordAuditEvent({
+      action: "student_document.upload_verification_failed",
+      actorUserId: context.identity.userId,
+      durable: true,
+      entityId: document.id,
+      entityTable: "student_documents",
+      hostelBranchId: student.hostel_branch_id,
+      metadata: {
+        error_code: error.code,
+        storage_bucket: document.storage_bucket,
+        storage_path: document.storage_path,
+        verification_details: verificationDetails,
+      },
+      organizationId: student.organization_id,
+    });
+
+    throw new AppError({
+      code: "VALIDATION_ERROR",
+      details: { reason: error.code },
+      message: "Uploaded document verification failed.",
+      statusCode: 400,
+    });
+  }
 }
 
 export type StudentListRow = StudentRow;

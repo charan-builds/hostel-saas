@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  STUDENT_DOCUMENT_ALLOWED_MIME_TYPES,
+  STUDENT_DOCUMENT_MAX_BYTES,
+} from "@/lib/storage/upload-validation";
+
 const emptyToUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value;
 
@@ -19,12 +24,9 @@ export const studentDocumentTypeSchema = z.enum([
   "medical",
   "other",
 ]);
-export const studentDocumentMimeTypeSchema = z.enum([
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
+export const studentDocumentMimeTypeSchema = z.enum(
+  STUDENT_DOCUMENT_ALLOWED_MIME_TYPES,
+);
 
 const optionalStringSchema = z.preprocess(
   emptyToUndefined,
@@ -107,7 +109,7 @@ export const createStudentDocumentUploadSchema = z.object({
     .trim()
     .toLowerCase()
     .pipe(studentDocumentMimeTypeSchema),
-  sizeBytes: z.coerce.number().int().min(1).max(10 * 1024 * 1024),
+  sizeBytes: z.coerce.number().int().min(1).max(STUDENT_DOCUMENT_MAX_BYTES),
 });
 
 export const completeStudentDocumentUploadSchema = z.object({

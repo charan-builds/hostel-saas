@@ -1,6 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import {
+  getAllowedOriginsForRequest,
+  isAllowedRequestOrigin,
+} from "@/lib/security/allowed-origins";
 import { checkRateLimit } from "@/lib/security/rate-limit";
+import {
+  logRejectedRequestOrigin,
+  readRequestOrigin,
+  readRequestUrlOrigin,
+} from "@/lib/security/request-origin";
 
 const MUTATION_METHODS = new Set(["DELETE", "PATCH", "POST", "PUT"]);
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -11,26 +20,6 @@ function getClientIp(request: NextRequest) {
     request.headers.get("x-real-ip") ??
     "unknown"
   );
-}
-
-function normalizeOrigin(value: string) {
-  try {
-    return new URL(value).origin;
-  } catch {
-    return null;
-  }
-}
-
-function getRequestOrigin(request: NextRequest) {
-  const origin = request.headers.get("origin");
-
-  if (origin) {
-    return normalizeOrigin(origin);
-  }
-
-  const referer = request.headers.get("referer");
-
-  return referer ? normalizeOrigin(referer) : null;
 }
 
 function makeSecurityResponse(request: NextRequest, status: number, message: string) {
@@ -55,14 +44,38 @@ export function isMutationRequest(request: NextRequest) {
 
 export function enforceSameOriginRequest(
   request: NextRequest,
-  allowedOrigins: readonly string[],
   options?: {
     requireOrigin?: boolean | undefined;
+    requestId?: string | undefined;
   },
 ) {
-  const requestOrigin = getRequestOrigin(request);
+  const requestOrigin = readRequestOrigin(request);
+  const requestUrlOrigin = readRequestUrlOrigin(request) ?? undefined;
+  const allowedOrigins = getAllowedOriginsForRequest({
+    requestUrlOrigin,
+  });
 
-  if (!requestOrigin) {
+  if (!requestOrigin.origin) {
+    if (!options?.requireOrigin && !requestOrigin.source) {
+      return null;
+    }
+
+    logRejectedRequestOrigin({
+      allowedOrigins,
+      reason: requestOrigin.source ? "invalid_origin" : "missing_origin",
+      request,
+      requestId: options?.requestId,
+      requestOrigin,
+    });
+
+    if (requestOrigin.source) {
+      return makeSecurityResponse(
+        request,
+        403,
+        "Mutation requests must include a valid same-origin Origin or Referer header.",
+      );
+    }
+
     if (options?.requireOrigin) {
       return makeSecurityResponse(
         request,
@@ -74,15 +87,23 @@ export function enforceSameOriginRequest(
     return null;
   }
 
-  const normalizedAllowedOrigins = allowedOrigins
-    .map(normalizeOrigin)
-    .filter((origin): origin is string => Boolean(origin));
-
-  if (normalizedAllowedOrigins.includes(requestOrigin)) {
+  if (isAllowedRequestOrigin(requestOrigin.origin, { requestUrlOrigin })) {
     return null;
   }
 
-  return makeSecurityResponse(request, 403, "Cross-origin mutation requests are blocked.");
+  logRejectedRequestOrigin({
+    allowedOrigins,
+    reason: "origin_not_allowed",
+    request,
+    requestId: options?.requestId,
+    requestOrigin,
+  });
+
+  return makeSecurityResponse(
+    request,
+    403,
+    "Cross-origin mutation requests are blocked. Configure NEXT_PUBLIC_APP_URL or ALLOWED_ORIGINS for trusted origins.",
+  );
 }
 
 export async function enforceRequestRateLimit(

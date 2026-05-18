@@ -8,7 +8,15 @@ import {
   enforceSameOriginRequest,
   isMutationRequest,
 } from "@/lib/security/request-protection";
+import { applySecurityHeaders } from "@/lib/security/security-headers";
 import type { Database } from "@/types/database.types";
+
+function finalizeProxyResponse(response: NextResponse, requestId: string) {
+  response.headers.set("x-request-id", requestId);
+  applySecurityHeaders(response.headers);
+
+  return response;
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -55,17 +63,13 @@ export async function updateSession(request: NextRequest) {
     isMutationRequest(request) && (isProtectedRoute(pathname) || isAuthRoute(pathname));
 
   if (shouldProtectMutation) {
-    const originResponse = enforceSameOriginRequest(request, [
-      request.nextUrl.origin,
-      publicEnv.NEXT_PUBLIC_APP_URL,
-    ], {
+    const originResponse = enforceSameOriginRequest(request, {
       requireOrigin: process.env.NODE_ENV === "production",
+      requestId,
     });
 
     if (originResponse) {
-      originResponse.headers.set("x-request-id", requestId);
-
-      return originResponse;
+      return finalizeProxyResponse(originResponse, requestId);
     }
 
     const rateLimitResponse = await enforceRequestRateLimit(request, {
@@ -74,29 +78,21 @@ export async function updateSession(request: NextRequest) {
     });
 
     if (rateLimitResponse) {
-      rateLimitResponse.headers.set("x-request-id", requestId);
-
-      return rateLimitResponse;
+      return finalizeProxyResponse(rateLimitResponse, requestId);
     }
   }
 
   if (isProtectedRoute(pathname) && !isAuthenticated) {
     const response = NextResponse.redirect(getLoginUrl(request.url, pathname));
 
-    response.headers.set("x-request-id", requestId);
-
-    return response;
+    return finalizeProxyResponse(response, requestId);
   }
 
   if (isAuthRoute(pathname) && isAuthenticated) {
     const response = NextResponse.redirect(new URL("/dashboard", request.url));
 
-    response.headers.set("x-request-id", requestId);
-
-    return response;
+    return finalizeProxyResponse(response, requestId);
   }
 
-  supabaseResponse.headers.set("x-request-id", requestId);
-
-  return supabaseResponse;
+  return finalizeProxyResponse(supabaseResponse, requestId);
 }

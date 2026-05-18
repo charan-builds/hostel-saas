@@ -2,6 +2,8 @@ import path from "node:path";
 
 import type { NextConfig } from "next";
 
+import { getSecurityHeaders } from "./lib/security/security-headers";
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
@@ -13,24 +15,10 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/:path*",
-        headers: [
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
-        ],
+        // Static route headers cover normal App Router, API, and public asset
+        // responses. Proxy-generated redirects/errors apply the same set again
+        // from `lib/security/security-headers.ts`.
+        headers: getSecurityHeaders(),
       },
     ];
   },
