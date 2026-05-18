@@ -1,8 +1,14 @@
 import type { Route } from "next";
 import Link from "next/link";
+import { AlertTriangle, ClipboardList, Clock, UserCheck } from "lucide-react";
 
 import { LeaveRequestForm } from "@/components/presence/leave-request-form";
 import { LeaveTable } from "@/components/presence/leave-table";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { SearchFilterBar } from "@/components/ui/search-filter-bar";
+import { StatCard } from "@/components/ui/stat-card";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { validateInput } from "@/lib/validation/zod";
 import {
@@ -14,6 +20,9 @@ import { listLeaveRequestsQuerySchema } from "@/modules/presence/schemas";
 type LeavePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const selectClassName =
+  "h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2";
 
 function leavePageHref(
   query: {
@@ -63,129 +72,96 @@ export default async function LeavePage({ searchParams }: LeavePageProps) {
 
   return (
     <section className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">Hostel ERP</p>
-          <h2 className="text-2xl font-semibold">Leave management</h2>
-        </div>
-        <div className="flex gap-3">
-          <Link
-            className="rounded border border-slate-300 px-4 py-2 text-sm font-medium"
-            href="/attendance"
-          >
-            Attendance
-          </Link>
-          <Link
-            className="rounded border border-slate-300 px-4 py-2 text-sm font-medium"
-            href="/gate-passes"
-          >
-            Gate passes
-          </Link>
-        </div>
-      </div>
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">Total</p>
-          <p className="mt-1 text-2xl font-semibold">
-            {leaveRequests.summary.total}
-          </p>
-        </div>
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">Pending</p>
-          <p className="mt-1 text-2xl font-semibold">
-            {leaveRequests.summary.pending}
-          </p>
-        </div>
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">Active</p>
-          <p className="mt-1 text-2xl font-semibold">
-            {leaveRequests.summary.active}
-          </p>
-        </div>
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm text-slate-500">Overdue</p>
-          <p className="mt-1 text-2xl font-semibold">
-            {leaveRequests.summary.overdue}
-          </p>
-        </div>
+      <PageHeader
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/attendance">Attendance</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/gate-passes">Gate passes</Link>
+            </Button>
+          </>
+        }
+        description="Approve requests, track active leave windows, and record student returns without leaving the workflow."
+        eyebrow="Hostel ERP"
+        title="Leave management"
+      />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          icon={ClipboardList}
+          label="Total requests"
+          value={String(leaveRequests.summary.total)}
+        />
+        <StatCard
+          icon={Clock}
+          label="Pending approval"
+          tone={leaveRequests.summary.pending > 0 ? "warning" : "default"}
+          value={String(leaveRequests.summary.pending)}
+        />
+        <StatCard
+          icon={UserCheck}
+          label="Active leaves"
+          tone="info"
+          value={String(leaveRequests.summary.active)}
+        />
+        <StatCard
+          icon={AlertTriangle}
+          label="Overdue returns"
+          tone={leaveRequests.summary.overdue > 0 ? "danger" : "default"}
+          value={String(leaveRequests.summary.overdue)}
+        />
       </div>
       <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
         <div className="space-y-4">
-          <form className="grid gap-3 rounded border border-slate-200 bg-white p-4 md:grid-cols-[1fr_180px_180px_120px]">
-            <input
-              className="rounded border border-slate-300 px-3 py-2"
+          <form action="/leave">
+            <SearchFilterBar
+              actions={
+                <Button type="submit" variant="outline">
+                  Apply filters
+                </Button>
+              }
               defaultValue={query.q ?? ""}
-              name="q"
               placeholder="Search reason or destination"
-            />
-            <select
-              className="rounded border border-slate-300 px-3 py-2"
-              defaultValue={query.status ?? ""}
-              name="status"
             >
-              <option value="">All statuses</option>
-              <option value="pending">pending</option>
-              <option value="approved">approved</option>
-              <option value="rejected">rejected</option>
-              <option value="checked_out">checked out</option>
-              <option value="returned">returned</option>
-              <option value="overdue">overdue</option>
-            </select>
-            <select
-              className="rounded border border-slate-300 px-3 py-2"
-              defaultValue={query.hostelBranchId ?? ""}
-              name="hostelBranchId"
-            >
-              <option value="">All branches</option>
-              {options.branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ))}
-            </select>
-            <button
-              className="rounded border border-slate-300 px-3 py-2 font-medium"
-              type="submit"
-            >
-              Filter
-            </button>
+              <select
+                className={selectClassName}
+                defaultValue={query.status ?? ""}
+                name="status"
+              >
+                <option value="">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="checked_out">Checked out</option>
+                <option value="returned">Returned</option>
+                <option value="overdue">Overdue</option>
+              </select>
+              <select
+                className={selectClassName}
+                defaultValue={query.hostelBranchId ?? ""}
+                name="hostelBranchId"
+              >
+                <option value="">All branches</option>
+                {options.branches.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            </SearchFilterBar>
           </form>
           <LeaveTable
             canManage={canManage}
             leaveRequests={leaveRequests.data}
           />
-          <div className="flex items-center justify-between gap-4 text-sm text-slate-500">
-            <p>
-              Page {leaveRequests.page} of {leaveRequests.pageCount},{" "}
-              {leaveRequests.count} total
-            </p>
-            <nav className="flex items-center gap-2" aria-label="Leave pagination">
-              {leaveRequests.page > 1 ? (
-                <Link
-                  className="rounded border border-slate-300 px-3 py-2 font-medium text-slate-900"
-                  href={leavePageHref(query, leaveRequests.page - 1)}
-                >
-                  Previous
-                </Link>
-              ) : (
-                <span className="rounded border border-slate-200 px-3 py-2 text-slate-400">
-                  Previous
-                </span>
-              )}
-              {leaveRequests.page < leaveRequests.pageCount ? (
-                <Link
-                  className="rounded border border-slate-300 px-3 py-2 font-medium text-slate-900"
-                  href={leavePageHref(query, leaveRequests.page + 1)}
-                >
-                  Next
-                </Link>
-              ) : (
-                <span className="rounded border border-slate-200 px-3 py-2 text-slate-400">
-                  Next
-                </span>
-              )}
-            </nav>
-          </div>
+          <PaginationControls
+            count={leaveRequests.count}
+            hrefForPage={(page) => leavePageHref(query, page)}
+            itemLabel="leave requests"
+            page={leaveRequests.page}
+            pageCount={leaveRequests.pageCount}
+          />
         </div>
         <LeaveRequestForm
           branches={options.branches}

@@ -1,11 +1,18 @@
 import { DashboardHome } from "@/components/dashboard/dashboard-home";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
+import { validateInput } from "@/lib/validation/zod";
 import { getAnalyticsDashboard } from "@/modules/analytics/analytics.service";
 import { dashboardQuerySchema } from "@/modules/analytics/schemas";
 import { getNotificationDashboardWidget } from "@/modules/notifications/notifications.service";
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const query = validateInput(dashboardQuerySchema, await searchParams);
   const context = await requireTenantPageAccess({
+    hostelBranchId: query.hostelBranchId,
     permission: "tenant:read",
     product: "hostel_erp",
   });
@@ -16,9 +23,7 @@ export default async function DashboardPage() {
     context.organizationId
       ? getNotificationDashboardWidget()
       : Promise.resolve({ items: [], unreadCount: 0 }),
-    canViewAnalytics
-      ? getAnalyticsDashboard(dashboardQuerySchema.parse({}))
-      : Promise.resolve(undefined),
+    canViewAnalytics ? getAnalyticsDashboard(query) : Promise.resolve(undefined),
   ]);
 
   return (

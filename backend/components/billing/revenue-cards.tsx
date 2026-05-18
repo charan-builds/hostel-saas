@@ -1,44 +1,64 @@
+import {
+  AlertTriangle,
+  ReceiptText,
+  WalletCards,
+  TrendingUp,
+} from "lucide-react";
+
+import { StatCard } from "@/components/ui/stat-card";
 import type { BillingSummary } from "@/modules/billing/billing.service";
+import { formatCurrency } from "@/lib/utils";
 
 type RevenueCardsProps = {
   summary: BillingSummary;
 };
 
-function formatMoney(cents: number, currencyCode: string) {
-  return new Intl.NumberFormat("en-IN", {
-    currency: currencyCode,
-    maximumFractionDigits: 0,
-    style: "currency",
-  }).format(cents / 100);
-}
-
 export function RevenueCards({ summary }: RevenueCardsProps) {
+  const collectionRate =
+    summary.totalCents > 0
+      ? Math.round((summary.paidCents / summary.totalCents) * 100)
+      : 0;
   const cards = [
     {
+      description: "Total active invoice value",
+      icon: ReceiptText,
       label: "Billed",
-      value: formatMoney(summary.totalCents, summary.currencyCode),
+      value: formatCurrency(summary.totalCents, summary.currencyCode),
     },
     {
+      description: `${collectionRate}% collection rate`,
+      icon: TrendingUp,
       label: "Collected",
-      value: formatMoney(summary.paidCents, summary.currencyCode),
+      tone: "success" as const,
+      value: formatCurrency(summary.paidCents, summary.currencyCode),
     },
     {
+      description: `${summary.pendingCount} pending invoices`,
+      icon: WalletCards,
       label: "Dues",
-      value: formatMoney(summary.balanceCents, summary.currencyCode),
+      tone: summary.balanceCents > 0 ? ("warning" as const) : ("default" as const),
+      value: formatCurrency(summary.balanceCents, summary.currencyCode),
     },
     {
+      description: "Past due invoices",
+      icon: AlertTriangle,
       label: "Overdue",
+      tone: summary.overdueCount > 0 ? ("danger" as const) : ("default" as const),
       value: String(summary.overdueCount),
     },
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => (
-        <div className="rounded border border-slate-200 bg-white p-4" key={card.label}>
-          <p className="text-sm font-medium text-slate-500">{card.label}</p>
-          <p className="mt-2 text-2xl font-semibold">{card.value}</p>
-        </div>
+        <StatCard
+          description={card.description}
+          icon={card.icon}
+          key={card.label}
+          label={card.label}
+          {...("tone" in card ? { tone: card.tone } : {})}
+          value={card.value}
+        />
       ))}
     </div>
   );

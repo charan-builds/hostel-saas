@@ -16,6 +16,7 @@ import {
   listPaymentsByIds,
   listReceiptsByPaymentIds,
   listStudentsByIds,
+  listStudentIdsForInvoiceSearch,
 } from "@/modules/billing/billing.repository";
 import type {
   AddInvoiceAdjustmentInput,
@@ -203,10 +204,22 @@ export async function listInvoices(input: ListInvoicesQuery) {
   });
   const organizationId = requireOrganizationId(context.organizationId);
   const supabase = await createSupabaseServerClient();
+  const studentSearchResult = await listStudentIdsForInvoiceSearch(
+    supabase,
+    organizationId,
+    input.q,
+    input.hostelBranchId,
+  );
+
+  if (studentSearchResult.error) {
+    throw mapDatabaseError(studentSearchResult.error);
+  }
+
   const [invoiceRowsResult, summaryRowsResult] = await Promise.all([
     listInvoiceRows({
       input,
       organizationId,
+      studentSearchIds: (studentSearchResult.data ?? []).map((student) => student.id),
       supabase,
     }),
     listInvoiceSummaryRows(supabase, organizationId, input.hostelBranchId),

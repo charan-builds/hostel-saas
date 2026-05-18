@@ -2,6 +2,15 @@
 
 import { useState, type FormEvent } from "react";
 
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type StudentDocumentUploadFormProps = {
@@ -17,6 +26,9 @@ type UploadUrlResponse = {
     token: string;
   };
 };
+
+const selectClassName =
+  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -121,47 +133,46 @@ export function StudentDocumentUploadForm({
   }
 
   return (
-    <form
-      className="space-y-4 rounded border border-slate-200 bg-white p-6"
-      onSubmit={handleSubmit}
-    >
-      <div>
-        <h3 className="font-semibold">Upload document</h3>
-      </div>
-      <div className="grid gap-4 md:grid-cols-[180px_1fr_auto]">
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Document type</span>
-          <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
-            name="documentType"
-            required
-          >
-            <option value="id_proof">ID proof</option>
-            <option value="address_proof">Address proof</option>
-            <option value="guardian_id">Guardian ID</option>
-            <option value="medical">Medical</option>
-            <option value="other">Other</option>
-          </select>
-        </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">File</span>
-          <input
-            accept="application/pdf,image/jpeg,image/png,image/webp"
-            className="w-full rounded border border-slate-300 px-3 py-2"
-            name="file"
-            required
-            type="file"
-          />
-        </label>
-        <button
-          className="self-end rounded bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-          disabled={isUploading}
-          type="submit"
-        >
-          {isUploading ? "Uploading" : "Upload"}
-        </button>
-      </div>
-      {message ? <p className="text-sm text-slate-600">{message}</p> : null}
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle>Upload document</CardTitle>
+        <CardDescription>
+          Attach student identity, guardian, address, medical, or supporting records.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-4 md:grid-cols-[180px_1fr_auto]">
+            <label className="space-y-2">
+              <span className="text-sm font-medium">Document type</span>
+              <select className={selectClassName} name="documentType" required>
+                <option value="id_proof">ID proof</option>
+                <option value="address_proof">Address proof</option>
+                <option value="guardian_id">Guardian ID</option>
+                <option value="medical">Medical</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label className="space-y-2">
+              <span className="text-sm font-medium">File</span>
+              <Input
+                accept="application/pdf,image/jpeg,image/png,image/webp"
+                name="file"
+                required
+                type="file"
+              />
+            </label>
+            <Button className="self-end" disabled={isUploading} type="submit">
+              {isUploading ? "Uploading" : "Upload"}
+            </Button>
+          </div>
+          {message ? (
+            <p aria-live="polite" className="text-sm text-muted-foreground">
+              {message}
+            </p>
+          ) : null}
+        </form>
+      </CardContent>
+    </Card>
   );
 }

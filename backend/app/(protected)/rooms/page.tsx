@@ -1,8 +1,13 @@
 import type { Route } from "next";
 import Link from "next/link";
+import { Plus, Settings } from "lucide-react";
 
 import { OccupancyCards } from "@/components/rooms/occupancy-cards";
 import { RoomTable } from "@/components/rooms/room-table";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { SearchFilterBar } from "@/components/ui/search-filter-bar";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { validateInput } from "@/lib/validation/zod";
 import { listRoomsQuerySchema } from "@/modules/rooms/schemas";
@@ -11,6 +16,9 @@ import { listRooms } from "@/modules/rooms/rooms.service";
 type RoomsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const selectClassName =
+  "h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2";
 
 function roomsPageHref(
   query: {
@@ -56,87 +64,67 @@ export default async function RoomsPage({ searchParams }: RoomsPageProps) {
 
   return (
     <section className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">Hostel ERP</p>
-          <h2 className="text-2xl font-semibold">Rooms and beds</h2>
-        </div>
-        <div className="flex gap-3">
-          <Link
-            className="rounded border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100"
-            href="/rooms/settings"
-          >
-            Settings
-          </Link>
-          <Link
-            className="rounded bg-slate-950 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-            href="/rooms/new"
-          >
-            Create room
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/rooms/settings">
+                <Settings aria-hidden="true" />
+                Settings
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/rooms/new">
+                <Plus aria-hidden="true" />
+                Create room
+              </Link>
+            </Button>
+          </>
+        }
+        description="Manage rooms, beds, capacity, pricing, and live occupancy by branch."
+        eyebrow="Hostel ERP"
+        title="Rooms and beds"
+      />
       <OccupancyCards totals={rooms.totals} />
-      <form className="grid gap-3 rounded border border-slate-200 bg-white p-4 md:grid-cols-[1fr_160px_160px_120px]">
-        <input
-          className="rounded border border-slate-300 px-3 py-2"
+      <form action="/rooms">
+        <SearchFilterBar
           defaultValue={query.q ?? ""}
-          name="q"
           placeholder="Search by code, name, floor"
-        />
-        <input
-          className="rounded border border-slate-300 px-3 py-2"
-          defaultValue={query.roomType ?? ""}
-          name="roomType"
-          placeholder="Room type"
-        />
-        <select
-          className="rounded border border-slate-300 px-3 py-2"
-          defaultValue={query.status ?? ""}
-          name="status"
+          actions={
+            <Button type="submit" variant="outline">
+              Apply filters
+            </Button>
+          }
         >
-          <option value="">All statuses</option>
-          <option value="active">active</option>
-          <option value="maintenance">maintenance</option>
-          <option value="unavailable">unavailable</option>
-          <option value="inactive">inactive</option>
-        </select>
-        <button className="rounded border border-slate-300 px-3 py-2 font-medium" type="submit">
-          Filter
-        </button>
+          <input
+            className={selectClassName}
+            defaultValue={query.roomType ?? ""}
+            name="roomType"
+            placeholder="Room type"
+          />
+          <select className={selectClassName} defaultValue={query.status ?? ""} name="status">
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="unavailable">Unavailable</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <select className={selectClassName} defaultValue={String(query.limit)} name="limit">
+            <option value="10">10 rows</option>
+            <option value="20">20 rows</option>
+            <option value="50">50 rows</option>
+            <option value="100">100 rows</option>
+          </select>
+        </SearchFilterBar>
       </form>
       <RoomTable rooms={rooms.data} />
-      <div className="flex items-center justify-between gap-4 text-sm text-slate-500">
-        <p>
-          Page {rooms.page} of {rooms.pageCount}, {rooms.count} total
-        </p>
-        <nav className="flex items-center gap-2" aria-label="Room pagination">
-          {rooms.page > 1 ? (
-            <Link
-              className="rounded border border-slate-300 px-3 py-2 font-medium text-slate-900"
-              href={roomsPageHref(query, rooms.page - 1)}
-            >
-              Previous
-            </Link>
-          ) : (
-            <span className="rounded border border-slate-200 px-3 py-2 text-slate-400">
-              Previous
-            </span>
-          )}
-          {rooms.page < rooms.pageCount ? (
-            <Link
-              className="rounded border border-slate-300 px-3 py-2 font-medium text-slate-900"
-              href={roomsPageHref(query, rooms.page + 1)}
-            >
-              Next
-            </Link>
-          ) : (
-            <span className="rounded border border-slate-200 px-3 py-2 text-slate-400">
-              Next
-            </span>
-          )}
-        </nav>
-      </div>
+      <PaginationControls
+        count={rooms.count}
+        hrefForPage={(page) => roomsPageHref(query, page)}
+        itemLabel="rooms"
+        page={rooms.page}
+        pageCount={rooms.pageCount}
+      />
     </section>
   );
 }

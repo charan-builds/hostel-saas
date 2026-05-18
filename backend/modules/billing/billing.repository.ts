@@ -9,12 +9,14 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient
 type ListInvoiceRowsOptions = {
   input: ListInvoicesQuery;
   organizationId: string;
+  studentSearchIds?: string[];
   supabase: SupabaseServerClient;
 };
 
 export async function listInvoiceRows({
   input,
   organizationId,
+  studentSearchIds = [],
   supabase,
 }: ListInvoiceRowsOptions) {
   const from = (input.page - 1) * input.limit;
@@ -37,11 +39,50 @@ export async function listInvoiceRows({
   }
 
   if (input.q) {
-    const filter = buildOrIlikeFilter(["invoice_number"], input.q);
+    const filterParts = [
+      buildOrIlikeFilter(["invoice_number"], input.q),
+      studentSearchIds.length > 0
+        ? `student_id.in.(${studentSearchIds.join(",")})`
+        : null,
+    ].filter(Boolean);
 
-    if (filter) {
-      query = query.or(filter);
+    if (filterParts.length > 0) {
+      query = query.or(filterParts.join(","));
     }
+  }
+
+  return query;
+}
+
+export async function listStudentIdsForInvoiceSearch(
+  supabase: SupabaseServerClient,
+  organizationId: string,
+  search: string | undefined,
+  hostelBranchId?: string,
+) {
+  if (!search) {
+    return { data: [], error: null };
+  }
+
+  const filter = buildOrIlikeFilter(
+    ["student_code", "first_name", "last_name", "email", "phone"],
+    search,
+  );
+
+  if (!filter) {
+    return { data: [], error: null };
+  }
+
+  let query = supabase
+    .from("students")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .is("deleted_at", null)
+    .or(filter)
+    .limit(100);
+
+  if (hostelBranchId) {
+    query = query.eq("hostel_branch_id", hostelBranchId);
   }
 
   return query;

@@ -1,3 +1,7 @@
+import { BedDouble, DoorOpen, Gauge, Hotel } from "lucide-react";
+
+import { StatCard } from "@/components/ui/stat-card";
+
 type OccupancyTotals = {
   availableBeds: number;
   capacity: number;
@@ -36,24 +40,27 @@ export function OccupancyCards({ totals }: OccupancyCardsProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-4">
-      <div className="rounded border border-slate-200 bg-white p-4">
-        <p className="text-sm font-medium text-slate-500">Rooms</p>
-        <p className="mt-2 text-2xl font-semibold">{totals.rooms}</p>
-      </div>
-      <div className="rounded border border-slate-200 bg-white p-4">
-        <p className="text-sm font-medium text-slate-500">Capacity</p>
-        <p className="mt-2 text-2xl font-semibold">{totals.capacity}</p>
-      </div>
-      <div className="rounded border border-slate-200 bg-white p-4">
-        <p className="text-sm font-medium text-slate-500">Vacant beds</p>
-        <p className="mt-2 text-2xl font-semibold">{totals.availableBeds}</p>
-      </div>
-      <div className="rounded border border-slate-200 bg-white p-4">
-        <p className="text-sm font-medium text-slate-500">Occupancy</p>
-        <p className="mt-2 text-2xl font-semibold">{totals.occupancyRate}%</p>
-      </div>
-      <div className="rounded border border-slate-200 bg-white p-4 md:col-span-4">
-        <div className="h-3 overflow-hidden rounded bg-slate-100">
+      <StatCard icon={Hotel} label="Rooms" value={String(totals.rooms)} />
+      <StatCard
+        description={`${totals.occupiedBeds} occupied`}
+        icon={BedDouble}
+        label="Capacity"
+        value={String(totals.capacity)}
+      />
+      <StatCard
+        icon={DoorOpen}
+        label="Vacant beds"
+        tone="success"
+        value={String(totals.availableBeds)}
+      />
+      <StatCard
+        icon={Gauge}
+        label="Occupancy"
+        tone={totals.occupancyRate >= 90 ? "warning" : "info"}
+        value={`${totals.occupancyRate}%`}
+      />
+      <div className="rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm md:col-span-4">
+        <div className="h-3 overflow-hidden rounded bg-muted">
           <div className="flex h-full">
             {segments.map((segment) => (
               <div
@@ -64,7 +71,7 @@ export function OccupancyCards({ totals }: OccupancyCardsProps) {
             ))}
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-600">
+        <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
           {segments.map((segment) => (
             <span className="flex items-center gap-2" key={segment.label}>
               <span className={`h-2.5 w-2.5 rounded-full ${segment.className}`} />

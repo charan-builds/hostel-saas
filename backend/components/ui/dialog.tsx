@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 type DialogProps = {
   children: ReactNode;
-  description?: string;
+  description?: string | undefined;
   onOpenChange: (open: boolean) => void;
   open: boolean;
   title: string;

@@ -11,9 +11,15 @@ import {
   ChevronDown,
   LogOut,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search,
 } from "lucide-react";
 
+import {
+  BranchSelector,
+  type BranchOption,
+} from "@/components/layout/branch-selector";
 import { CommandPalette } from "@/components/layout/command-palette";
 import {
   getVisibleNavigation,
@@ -55,12 +61,15 @@ export type ShellNotification = {
 };
 
 type DashboardShellClientProps = {
+  branchOptions: BranchOption[];
   children: ReactNode;
   notifications: ShellNotification[];
   tenant: ShellTenant;
   tenantOptions: TenantOption[];
   unreadCount: number;
 };
+
+export type { BranchOption };
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -97,10 +106,12 @@ function Breadcrumbs({ pathname }: { pathname: string }) {
 }
 
 function SidebarNav({
+  collapsed = false,
   navigation,
   onNavigate,
   pathname,
 }: {
+  collapsed?: boolean;
   navigation: NavigationGroup[];
   onNavigate?: () => void;
   pathname: string;
@@ -109,9 +120,11 @@ function SidebarNav({
     <nav className="space-y-6" aria-label="Primary navigation">
       {navigation.map((group) => (
         <div key={group.label}>
-          <p className="px-3 text-xs font-semibold uppercase tracking-normal text-muted-foreground">
-            {group.label}
-          </p>
+          {collapsed ? null : (
+            <p className="px-3 text-xs font-semibold uppercase tracking-normal text-muted-foreground">
+              {group.label}
+            </p>
+          )}
           <div className="mt-2 space-y-1">
             {group.items.map((item) => {
               const active = isActive(pathname, item.href);
@@ -119,18 +132,21 @@ function SidebarNav({
               return (
                 <Link
                   aria-current={active ? "page" : undefined}
+                  aria-label={collapsed ? item.label : undefined}
                   className={cn(
                     "flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
+                    collapsed ? "justify-center px-0" : undefined,
                     active
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                   href={item.href}
                   key={item.href}
+                  title={collapsed ? item.label : undefined}
                   {...(onNavigate ? { onClick: onNavigate } : {})}
                 >
                   <item.icon className="size-4" aria-hidden="true" />
-                  {item.label}
+                  {collapsed ? null : item.label}
                 </Link>
               );
             })}
@@ -303,6 +319,7 @@ function UserMenu({ tenant }: { tenant: ShellTenant }) {
 }
 
 export function DashboardShellClient({
+  branchOptions,
   children,
   notifications,
   tenant,
@@ -312,26 +329,73 @@ export function DashboardShellClient({
   const pathname = usePathname();
   const [commandOpen, setCommandOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const navigation = useMemo(() => getVisibleNavigation(tenant.role), [tenant.role]);
-  const scopeLabel = tenant.organizationId
-    ? `Tenant ${tenant.organizationId.slice(0, 8)}`
-    : "Global workspace";
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const navigation = useMemo(
+    () =>
+      getVisibleNavigation(tenant.role, {
+        hasBranchScope: branchOptions.length > 0 || Boolean(tenant.hostelBranchId),
+        hasTenantScope: Boolean(tenant.organizationId) || tenant.isSuperadmin,
+      }),
+    [
+      branchOptions.length,
+      tenant.hostelBranchId,
+      tenant.isSuperadmin,
+      tenant.organizationId,
+      tenant.role,
+    ],
+  );
+  const currentTenantLabel =
+    tenantOptions.find((option) => option.organizationId === tenant.organizationId)
+      ?.label ??
+    (tenant.organizationId ? `Tenant ${tenant.organizationId.slice(0, 8)}` : "Global");
+  const scopeLabel = tenant.organizationId ? currentTenantLabel : "Global workspace";
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-72 border-r border-border bg-card lg:block">
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-30 hidden border-r border-border bg-card transition-[width] lg:block",
+          sidebarCollapsed ? "w-20" : "w-72",
+        )}
+      >
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center gap-3 border-b border-border px-5">
+          <div
+            className={cn(
+              "flex h-16 items-center gap-3 border-b border-border px-4",
+              sidebarCollapsed ? "justify-center" : undefined,
+            )}
+          >
             <div className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground">
               H
             </div>
-            <div>
-              <p className="font-semibold">Hostel ERP</p>
-              <p className="text-xs text-muted-foreground">{scopeLabel}</p>
-            </div>
+            {sidebarCollapsed ? null : (
+              <div className="min-w-0">
+                <p className="font-semibold">Hostel ERP</p>
+                <p className="truncate text-xs text-muted-foreground">{scopeLabel}</p>
+              </div>
+            )}
           </div>
           <div className="flex-1 overflow-y-auto px-3 py-5">
-            <SidebarNav navigation={navigation} pathname={pathname} />
+            <SidebarNav
+              collapsed={sidebarCollapsed}
+              navigation={navigation}
+              pathname={pathname}
+            />
+          </div>
+          <div className="border-t border-border p-3">
+            <Button
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className={cn("w-full", sidebarCollapsed ? "px-0" : "justify-start")}
+              onClick={() => setSidebarCollapsed((value) => !value)}
+              variant="ghost"
+            >
+              {sidebarCollapsed ? (
+                <PanelLeftOpen aria-hidden="true" />
+              ) : (
+                <PanelLeftClose aria-hidden="true" />
+              )}
+              {sidebarCollapsed ? null : "Collapse"}
+            </Button>
           </div>
         </div>
       </aside>
@@ -341,13 +405,26 @@ export function DashboardShellClient({
         side="left"
         title="Hostel ERP"
       >
+        <div className="mb-5 space-y-3">
+          <TenantSwitcher tenant={tenant} tenantOptions={tenantOptions} />
+          <BranchSelector
+            branches={branchOptions}
+            className="block"
+            selectedBranchId={tenant.hostelBranchId}
+          />
+        </div>
         <SidebarNav
           navigation={navigation}
           onNavigate={() => setMobileOpen(false)}
           pathname={pathname}
         />
       </Sheet>
-      <div className="lg:pl-72">
+      <div
+        className={cn(
+          "transition-[padding]",
+          sidebarCollapsed ? "lg:pl-20" : "lg:pl-72",
+        )}
+      >
         <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
@@ -376,7 +453,13 @@ export function DashboardShellClient({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <TenantSwitcher tenant={tenant} tenantOptions={tenantOptions} />
+              <div className="hidden md:block">
+                <TenantSwitcher tenant={tenant} tenantOptions={tenantOptions} />
+              </div>
+              <BranchSelector
+                branches={branchOptions}
+                selectedBranchId={tenant.hostelBranchId}
+              />
               <ThemeToggle />
               <NotificationDropdown
                 notifications={notifications}

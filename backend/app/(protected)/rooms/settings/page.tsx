@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import {
   createHostelBranchAction,
@@ -5,6 +7,11 @@ import {
   createRoomTemplateAction,
 } from "@/modules/rooms/actions";
 import { getRoomFormOptions } from "@/modules/rooms/rooms.service";
+
+const fieldClassName =
+  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2";
+
+const formClassName = "grid gap-4 rounded-lg border border-border bg-card p-6 shadow-sm";
 
 export default async function RoomSettingsPage() {
   await requireTenantPageAccess({
@@ -16,21 +23,19 @@ export default async function RoomSettingsPage() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-sm font-medium text-slate-500">Rooms and beds</p>
-        <h2 className="text-2xl font-semibold">Configuration</h2>
-      </div>
+      <PageHeader
+        description="Create branches, floors, and reusable room templates for dynamic hostel operations."
+        eyebrow="Rooms and beds"
+        title="Configuration"
+      />
       <div className="grid gap-6 lg:grid-cols-3">
-        <form
-          action={createHostelBranchAction}
-          className="grid gap-4 rounded border border-slate-200 bg-white p-6"
-        >
+        <form action={createHostelBranchAction} className={formClassName}>
           <input name="organizationId" type="hidden" value={options.organizationId} />
           <h3 className="font-semibold">Create branch</h3>
           <label className="space-y-1">
             <span className="text-sm font-medium">Branch name</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               name="name"
               required
             />
@@ -38,7 +43,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Slug</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               name="slug"
               required
             />
@@ -46,7 +51,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Timezone</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue="UTC"
               name="timezone"
             />
@@ -54,7 +59,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Status</span>
             <select
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue="active"
               name="status"
             >
@@ -63,23 +68,17 @@ export default async function RoomSettingsPage() {
               <option value="archived">archived</option>
             </select>
           </label>
-          <button
-            className="rounded bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-800"
-            type="submit"
-          >
+          <Button type="submit">
             Create branch
-          </button>
+          </Button>
         </form>
-        <form
-          action={createHostelFloorAction}
-          className="grid gap-4 rounded border border-slate-200 bg-white p-6"
-        >
+        <form action={createHostelFloorAction} className={formClassName}>
           <input name="organizationId" type="hidden" value={options.organizationId} />
           <h3 className="font-semibold">Create floor</h3>
           <label className="space-y-1">
             <span className="text-sm font-medium">Branch</span>
             <select
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue={selectedBranchId}
               name="hostelBranchId"
               required
@@ -94,7 +93,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Floor code</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               name="floorCode"
               required
             />
@@ -102,7 +101,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Floor name</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               name="name"
               required
             />
@@ -110,7 +109,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Sort order</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue={0}
               min={0}
               name="sortOrder"
@@ -120,7 +119,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Status</span>
             <select
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue="active"
               name="status"
             >
@@ -129,23 +128,17 @@ export default async function RoomSettingsPage() {
               <option value="inactive">inactive</option>
             </select>
           </label>
-          <button
-            className="rounded bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-800"
-            type="submit"
-          >
+          <Button type="submit">
             Create floor
-          </button>
+          </Button>
         </form>
-        <form
-          action={createRoomTemplateAction}
-          className="grid gap-4 rounded border border-slate-200 bg-white p-6"
-        >
+        <form action={createRoomTemplateAction} className={formClassName}>
           <input name="organizationId" type="hidden" value={options.organizationId} />
           <h3 className="font-semibold">Create room template</h3>
           <label className="space-y-1">
             <span className="text-sm font-medium">Branch</span>
             <select
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue={selectedBranchId}
               name="hostelBranchId"
               required
@@ -160,7 +153,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Template name</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               name="name"
               required
             />
@@ -168,7 +161,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Slug</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               name="slug"
               required
             />
@@ -176,7 +169,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Room type key</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               name="roomTypeKey"
               required
             />
@@ -184,7 +177,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Default capacity</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue={1}
               min={1}
               name="defaultCapacity"
@@ -194,7 +187,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Monthly rate cents</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue={0}
               min={0}
               name="monthlyRateCents"
@@ -204,7 +197,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Security deposit cents</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue={0}
               min={0}
               name="securityDepositCents"
@@ -214,7 +207,7 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Currency</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2 uppercase"
+              className={`${fieldClassName} uppercase`}
               defaultValue="INR"
               maxLength={3}
               minLength={3}
@@ -224,17 +217,14 @@ export default async function RoomSettingsPage() {
           <label className="space-y-1">
             <span className="text-sm font-medium">Bed label pattern</span>
             <input
-              className="w-full rounded border border-slate-300 px-3 py-2"
+              className={fieldClassName}
               defaultValue="{ROOM}-B{NN}"
               name="bedLabelPattern"
             />
           </label>
-          <button
-            className="rounded bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-800"
-            type="submit"
-          >
+          <Button type="submit">
             Create template
-          </button>
+          </Button>
         </form>
       </div>
     </section>

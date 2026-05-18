@@ -1,3 +1,12 @@
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import type { Database, Json } from "@/types/database.types";
 import {
   assignStudentBedAction,
@@ -31,6 +40,17 @@ type StudentFormProps = {
   student?: StudentRow;
 };
 
+const selectClassName =
+  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+
+function FieldLabel({ children }: { children: string }) {
+  return (
+    <span className="text-sm font-medium leading-none text-foreground">
+      {children}
+    </span>
+  );
+}
+
 function readJsonValue(value: Json, key: string) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return "";
@@ -56,32 +76,30 @@ export function StudentForm({
     <div className="space-y-6">
       <form
         action={action}
-        className="grid gap-5 rounded border border-slate-200 bg-white p-6 md:grid-cols-2"
+        className="grid gap-5 rounded-lg border border-border bg-card p-5 text-card-foreground shadow-sm md:grid-cols-2"
       >
         <input name="organizationId" type="hidden" value={organizationId} />
         {student ? <input name="studentId" type="hidden" value={student.id} /> : null}
-        <label className="space-y-1">
-          <span className="text-sm font-medium">First name</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>First name</FieldLabel>
+          <Input
             defaultValue={student?.first_name}
             name="firstName"
             required
           />
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Last name</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Last name</FieldLabel>
+          <Input
             defaultValue={student?.last_name}
             name="lastName"
             required
           />
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Hostel branch</span>
+        <label className="space-y-2">
+          <FieldLabel>Hostel branch</FieldLabel>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={selectClassName}
             defaultValue={selectedBranchId}
             name="hostelBranchId"
             required
@@ -93,47 +111,43 @@ export function StudentForm({
             ))}
           </select>
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Status</span>
+        <label className="space-y-2" id="status">
+          <FieldLabel>Status</FieldLabel>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={selectClassName}
             defaultValue={student?.status ?? "active"}
             name="status"
           >
-            <option value="active">active</option>
-            <option value="inactive">inactive</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
           </select>
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Email</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Email</FieldLabel>
+          <Input
             defaultValue={student?.email ?? ""}
             name="email"
             type="email"
           />
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Phone</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Phone</FieldLabel>
+          <Input
             defaultValue={student?.phone ?? ""}
             name="phone"
           />
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Date of birth</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Date of birth</FieldLabel>
+          <Input
             defaultValue={student?.date_of_birth ?? ""}
             name="dateOfBirth"
             type="date"
           />
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Admission date</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Admission date</FieldLabel>
+          <Input
             defaultValue={
               student?.admission_date ?? new Date().toISOString().slice(0, 10)
             }
@@ -142,69 +156,64 @@ export function StudentForm({
             type="date"
           />
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Gender</span>
+        <label className="space-y-2">
+          <FieldLabel>Gender</FieldLabel>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={selectClassName}
             defaultValue={student?.gender ?? ""}
             name="gender"
           >
             <option value="">Not specified</option>
-            <option value="female">female</option>
-            <option value="male">male</option>
-            <option value="non_binary">non_binary</option>
-            <option value="prefer_not_to_say">prefer_not_to_say</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="non_binary">Non binary</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
           </select>
         </label>
         <div className="hidden md:block" />
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Guardian name</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Guardian name</FieldLabel>
+          <Input
             defaultValue={readJsonValue(student?.guardian_info ?? {}, "name")}
             name="guardianName"
           />
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Guardian phone</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Guardian phone</FieldLabel>
+          <Input
             defaultValue={readJsonValue(student?.guardian_info ?? {}, "phone")}
             name="guardianPhone"
           />
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Guardian email</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Guardian email</FieldLabel>
+          <Input
             defaultValue={readJsonValue(student?.guardian_info ?? {}, "email")}
             name="guardianEmail"
             type="email"
           />
         </label>
         <div className="hidden md:block" />
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Emergency contact</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Emergency contact</FieldLabel>
+          <Input
             defaultValue={readJsonValue(student?.emergency_contact ?? {}, "name")}
             name="emergencyContactName"
           />
         </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Emergency phone</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+        <label className="space-y-2">
+          <FieldLabel>Emergency phone</FieldLabel>
+          <Input
             defaultValue={readJsonValue(student?.emergency_contact ?? {}, "phone")}
             name="emergencyContactPhone"
           />
         </label>
         {!isEditing ? (
           <>
-            <label className="space-y-1">
-              <span className="text-sm font-medium">Room</span>
+            <label className="space-y-2">
+              <FieldLabel>Room</FieldLabel>
               <select
-                className="w-full rounded border border-slate-300 px-3 py-2"
+                className={selectClassName}
                 name="roomId"
               >
                 <option value="">Assign later</option>
@@ -215,10 +224,10 @@ export function StudentForm({
                 ))}
               </select>
             </label>
-            <label className="space-y-1">
-              <span className="text-sm font-medium">Bed</span>
+            <label className="space-y-2">
+              <FieldLabel>Bed</FieldLabel>
               <select
-                className="w-full rounded border border-slate-300 px-3 py-2"
+                className={selectClassName}
                 name="bedId"
               >
                 <option value="">Assign later</option>
@@ -232,65 +241,77 @@ export function StudentForm({
           </>
         ) : null}
         <div className="md:col-span-2">
-          <button
-            className="rounded bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-800"
-            type="submit"
-          >
+          <Button type="submit">
             {isEditing ? "Save student" : "Create student"}
-          </button>
+          </Button>
         </div>
       </form>
       {student ? (
-        <div className="grid gap-6 rounded border border-slate-200 bg-white p-6 md:grid-cols-2">
-          <form action={assignStudentBedAction} className="space-y-4">
-            <input name="studentId" type="hidden" value={student.id} />
-            <input name="organizationId" type="hidden" value={organizationId} />
-            <input
-              name="hostelBranchId"
-              type="hidden"
-              value={student.hostel_branch_id}
-            />
-            <h3 className="font-semibold">Assign room and bed</h3>
-            <label className="block space-y-1">
-              <span className="text-sm font-medium">Room</span>
-              <select className="w-full rounded border border-slate-300 px-3 py-2" name="roomId">
-                {rooms.map((room) => (
-                  <option key={room.id} value={room.id}>
-                    {room.room_code} - {room.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block space-y-1">
-              <span className="text-sm font-medium">Bed</span>
-              <select className="w-full rounded border border-slate-300 px-3 py-2" name="bedId">
-                {beds.map((bed) => (
-                  <option key={bed.id} value={bed.id}>
-                    {bed.bed_code}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button className="rounded border border-slate-300 px-4 py-2 font-medium" type="submit">
-              Assign bed
-            </button>
-          </form>
-          <form action={softDeleteStudentAction} className="space-y-4">
-            <input name="studentId" type="hidden" value={student.id} />
-            <input name="organizationId" type="hidden" value={organizationId} />
-            <input
-              name="hostelBranchId"
-              type="hidden"
-              value={student.hostel_branch_id}
-            />
-            <h3 className="font-semibold">Archive student</h3>
-            <button
-              className="rounded border border-red-300 px-4 py-2 font-medium text-red-700 hover:bg-red-50"
-              type="submit"
-            >
-              Soft delete
-            </button>
-          </form>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card id="assign-bed">
+            <CardHeader>
+              <CardTitle>Assign room and bed</CardTitle>
+              <CardDescription>
+                Move the student into an available bed in their branch.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form action={assignStudentBedAction} className="space-y-4">
+                <input name="studentId" type="hidden" value={student.id} />
+                <input name="organizationId" type="hidden" value={organizationId} />
+                <input
+                  name="hostelBranchId"
+                  type="hidden"
+                  value={student.hostel_branch_id}
+                />
+                <label className="block space-y-2">
+                  <FieldLabel>Room</FieldLabel>
+                  <select className={selectClassName} name="roomId">
+                    {rooms.map((room) => (
+                      <option key={room.id} value={room.id}>
+                        {room.room_code} - {room.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block space-y-2">
+                  <FieldLabel>Bed</FieldLabel>
+                  <select className={selectClassName} name="bedId">
+                    {beds.map((bed) => (
+                      <option key={bed.id} value={bed.id}>
+                        {bed.bed_code}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <Button type="submit" variant="outline">
+                  Assign bed
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Archive student</CardTitle>
+              <CardDescription>
+                Soft delete keeps audit and billing history intact.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form action={softDeleteStudentAction} className="space-y-4">
+                <input name="studentId" type="hidden" value={student.id} />
+                <input name="organizationId" type="hidden" value={organizationId} />
+                <input
+                  name="hostelBranchId"
+                  type="hidden"
+                  value={student.hostel_branch_id}
+                />
+                <Button type="submit" variant="destructive">
+                  Soft delete
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       ) : null}
     </div>

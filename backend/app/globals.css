@@ -105,3 +105,52 @@ textarea {
 ::selection {
   background: color-mix(in srgb, var(--primary) 20%, transparent);
 }
+
+@layer utilities {
+  .dark .bg-white {
+    background-color: var(--card);
+  }
+
+  .dark .bg-slate-50,
+  .dark .bg-slate-100 {
+    background-color: var(--muted);
+  }
+
+  .dark .bg-slate-950 {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .dark .border-slate-200,
+  .dark .border-slate-300 {
+    border-color: var(--border);
+  }
+
+  .dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--border);
+  }
+
+  .dark .text-slate-950,
+  .dark .text-slate-900,
+  .dark .text-slate-800,
+  .dark .text-slate-700 {
+    color: var(--foreground);
+  }
+
+  .dark .text-slate-600,
+  .dark .text-slate-500,
+  .dark .text-slate-400 {
+    color: var(--muted-foreground);
+  }
+
+  .dark .hover\:bg-slate-50:hover,
+  .dark .hover\:bg-slate-100:hover {
+    background-color: var(--accent);
+  }
+
+  .dark input.bg-white,
+  .dark select.bg-white,
+  .dark textarea.bg-white {
+    background-color: var(--background);
+  }
+}

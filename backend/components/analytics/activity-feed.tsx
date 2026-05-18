@@ -13,16 +13,18 @@ function formatDateTime(value: string) {
 
 export function ActivityFeed({ activity }: ActivityFeedProps) {
   return (
-    <div className="rounded border border-slate-200 bg-white p-4">
+    <div className="rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm">
       <p className="font-medium">Recent operational activity</p>
-      <div className="mt-4 divide-y divide-slate-200">
+      <div className="mt-4 divide-y divide-border">
         {activity.length === 0 ? (
-          <p className="py-4 text-sm text-slate-500">No recent activity found.</p>
+          <p className="py-4 text-sm text-muted-foreground">
+            No recent activity found.
+          </p>
         ) : (
           activity.map((event) => (
             <div key={event.id} className="py-3">
               <p className="text-sm font-medium">{event.action}</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {formatDateTime(event.created_at)}
                 {event.entity_table ? ` - ${event.entity_table}` : ""}
               </p>

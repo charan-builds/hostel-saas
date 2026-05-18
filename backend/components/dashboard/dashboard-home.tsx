@@ -2,20 +2,36 @@ import Link from "next/link";
 import type { Route } from "next";
 import {
   Activity,
+  Banknote,
   BedDouble,
   Bell,
   CalendarCheck,
   CreditCard,
   DoorOpen,
   FileBarChart,
+  Megaphone,
+  Plus,
+  ReceiptText,
+  UserPlus,
   Users,
+  WalletCards,
+  type LucideIcon,
 } from "lucide-react";
 
+import { ActivityFeed } from "@/components/analytics/activity-feed";
 import { SimpleBarChart } from "@/components/charts/simple-bar-chart";
-import { KpiCard } from "@/components/dashboard/kpi-card";
+import { TenantHeader } from "@/components/layout/tenant-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/state";
+import { StatCard } from "@/components/ui/stat-card";
 import type { getAnalyticsDashboard } from "@/modules/analytics/analytics.service";
 import { formatCurrency } from "@/lib/utils";
 
@@ -36,6 +52,10 @@ function statusItems(statuses: Record<string, number>) {
   }));
 }
 
+function sumRows<T>(rows: T[] | undefined, selector: (row: T) => number | null) {
+  return (rows ?? []).reduce((total, row) => total + (selector(row) ?? 0), 0);
+}
+
 export function DashboardHome({
   analytics,
   canManageTenant,
@@ -44,92 +64,188 @@ export function DashboardHome({
   unreadNotifications,
 }: DashboardHomeProps) {
   const currencyCode = analytics?.billing.currencyCode ?? "INR";
-  const quickActions = [
-    {
-      href: "/students/new",
-      label: "Add student",
-    },
-    {
-      href: "/rooms/new",
-      label: "Create room",
-    },
-    {
-      href: "/billing",
-      label: "Collect payment",
-    },
-    {
-      href: "/notices/manage",
-      label: "Publish notice",
-    },
-  ] satisfies Array<{ href: Route; label: string }>;
+  const selectedBranch = analytics?.filters.hostelBranchId
+    ? analytics.branches.find((branch) => branch.id === analytics.filters.hostelBranchId)
+    : undefined;
+  const totalStudents = sumRows(analytics?.occupancy.rows, (row) => row.active_students);
+  const openInvoices = sumRows(analytics?.billing.rows, (row) => row.open_invoice_count);
+  const overdueInvoices = sumRows(
+    analytics?.billing.rows,
+    (row) => row.overdue_invoice_count,
+  );
+  const recentPayments = sumRows(analytics?.revenue, (row) => row.payment_count);
+  const activeLeaves =
+    (analytics?.leave.byStatus.pending ?? 0) + (analytics?.leave.byStatus.approved ?? 0);
+  const quickActions = (
+    isSuperadmin
+      ? [
+          {
+            href: "/super-admin/onboarding",
+            icon: Plus,
+            label: "Create tenant",
+          },
+        ]
+      : canManageTenant
+        ? [
+            {
+              href: "/students/new",
+              icon: UserPlus,
+              label: "Admit student",
+            },
+            {
+              href: "/rooms/new",
+              icon: BedDouble,
+              label: "Create room",
+            },
+            {
+              href: "/billing",
+              icon: Banknote,
+              label: "Collect rent",
+            },
+            {
+              href: "/attendance",
+              icon: CalendarCheck,
+              label: "Mark attendance",
+            },
+            {
+              href: "/leave",
+              icon: FileBarChart,
+              label: "Review leave",
+            },
+            {
+              href: "/notices/manage",
+              icon: Megaphone,
+              label: "Publish notice",
+            },
+          ]
+        : [
+            {
+              href: "/leave",
+              icon: FileBarChart,
+              label: "Request leave",
+            },
+            {
+              href: "/notices",
+              icon: Megaphone,
+              label: "View notices",
+            },
+            {
+              href: "/gate-passes",
+              icon: DoorOpen,
+              label: "Gate pass",
+            },
+          ]
+  ) satisfies Array<{ href: Route; icon: LucideIcon; label: string }>;
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Hostel ERP</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-normal sm:text-3xl">
-            Operations dashboard
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Monitor occupancy, collections, attendance, and daily hostel activity.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {isSuperadmin ? (
-            <Button asChild>
-              <Link href="/super-admin/onboarding">Create tenant</Link>
-            </Button>
-          ) : null}
-          {canManageTenant ? (
-            <>
-              <Button asChild variant="outline">
-                <Link href="/analytics">Analytics</Link>
+      <PageHeader
+        actions={
+          <>
+            {isSuperadmin ? (
+              <Button asChild>
+                <Link href="/super-admin/onboarding">Create tenant</Link>
               </Button>
-              <Button asChild variant="outline">
-                <Link href="/reports">Reports</Link>
-              </Button>
-            </>
-          ) : null}
-        </div>
-      </div>
+            ) : null}
+            {canManageTenant ? (
+              <>
+                <Button asChild variant="outline">
+                  <Link href="/analytics">Analytics</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/reports">Reports</Link>
+                </Button>
+              </>
+            ) : null}
+          </>
+        }
+        description="Occupancy, rent collection, attendance, leave, and communication in one daily operations view."
+        eyebrow="Hostel ERP"
+        meta={
+          <TenantHeader
+            branchName={selectedBranch?.name}
+            isSuperadmin={isSuperadmin}
+            role={role}
+          />
+        }
+        title="Operations dashboard"
+      />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
-          description="Current branch and tenant occupancy"
+        <StatCard
+          description="Active students in the selected scope"
+          href="/students"
+          icon={Users}
+          label="Total students"
+          tone="info"
+          value={String(totalStudents)}
+        />
+        <StatCard
+          description={`${analytics?.occupancy.availableBeds ?? 0} beds available`}
+          href="/rooms"
           icon={BedDouble}
           label="Occupancy"
           tone="success"
           value={analytics ? `${analytics.occupancy.rate}%` : "Ready"}
         />
-        <KpiCard
-          description="Recorded payments in selected range"
+        <StatCard
+          description={`${openInvoices} open invoices`}
+          href="/billing"
           icon={CreditCard}
           label="Collections"
           value={formatCurrency(analytics?.billing.collectedCents ?? 0, currencyCode)}
         />
-        <KpiCard
-          description="Open balance across active invoices"
+        <StatCard
+          description={`${overdueInvoices} overdue invoices`}
+          href="/billing"
           icon={FileBarChart}
           label="Pending dues"
-          tone={(analytics?.billing.pendingDueCents ?? 0) > 0 ? "warning" : "default"}
+          tone={overdueInvoices > 0 ? "warning" : "default"}
           value={formatCurrency(analytics?.billing.pendingDueCents ?? 0, currencyCode)}
         />
-        <KpiCard
-          description="Unread operational messages"
-          icon={Bell}
-          label="Notifications"
-          tone={unreadNotifications > 0 ? "info" : "default"}
-          value={String(unreadNotifications)}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          description="Occupied beds from live assignments"
+          href="/rooms"
+          icon={Activity}
+          label="Occupied beds"
+          value={`${analytics?.occupancy.occupiedBeds ?? 0}/${analytics?.occupancy.totalBeds ?? 0}`}
+        />
+        <StatCard
+          description="Attendance rows in the selected range"
+          href="/attendance"
+          icon={CalendarCheck}
+          label="Attendance"
+          value={String(analytics?.attendance.total ?? 0)}
+        />
+        <StatCard
+          description="Pending and approved leave requests"
+          href="/leave"
+          icon={DoorOpen}
+          label="Active leaves"
+          tone={activeLeaves > 0 ? "warning" : "default"}
+          value={String(activeLeaves)}
+        />
+        <StatCard
+          description={`${recentPayments} payment records`}
+          href="/billing"
+          icon={ReceiptText}
+          label="Recent payments"
+          value={formatCurrency(analytics?.billing.collectedCents ?? 0, currencyCode)}
         />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
         <Card>
           <CardHeader>
-            <CardTitle>Quick actions</CardTitle>
+            <CardTitle>Daily actions</CardTitle>
+            <CardDescription>
+              The fastest paths for hostel desk work and tenant administration.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {quickActions.map((action) => (
               <Button
                 asChild
@@ -137,70 +253,109 @@ export function DashboardHome({
                 key={action.href}
                 variant="outline"
               >
-                <Link href={action.href}>{action.label}</Link>
+                <Link href={action.href}>
+                  <action.icon aria-hidden="true" />
+                  {action.label}
+                </Link>
               </Button>
             ))}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Workspace role</CardTitle>
+            <CardTitle>Operational alerts</CardTitle>
+            <CardDescription>Items that usually need same-day attention.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-md bg-accent text-accent-foreground">
-                <Users className="size-5" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="font-semibold capitalize">{role}</p>
-                <p className="text-sm text-muted-foreground">
-                  Role-aware navigation and actions are enabled.
-                </p>
-              </div>
-            </div>
+          <CardContent className="space-y-3">
+            <Link
+              className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm hover:bg-accent"
+              href="/notifications"
+            >
+              <span className="flex items-center gap-2">
+                <Bell className="size-4 text-info" aria-hidden="true" />
+                Unread notifications
+              </span>
+              <span className="font-semibold">{unreadNotifications}</span>
+            </Link>
+            <Link
+              className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm hover:bg-accent"
+              href="/billing"
+            >
+              <span className="flex items-center gap-2">
+                <WalletCards className="size-4 text-warning" aria-hidden="true" />
+                Unpaid invoices
+              </span>
+              <span className="font-semibold">{openInvoices}</span>
+            </Link>
+            <Link
+              className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm hover:bg-accent"
+              href="/notices"
+            >
+              <span className="flex items-center gap-2">
+                <Megaphone className="size-4 text-success" aria-hidden="true" />
+                Notices
+              </span>
+              <span className="font-semibold">{analytics?.notifications.delivered ?? 0}</span>
+            </Link>
           </CardContent>
         </Card>
       </div>
 
-      {analytics ? (
-        <div className="grid gap-4 xl:grid-cols-3">
-          <SimpleBarChart
-            items={statusItems(analytics.attendance.byStatus)}
-            title="Attendance"
+      <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
+        {analytics ? (
+          <div className="grid gap-4 xl:grid-cols-3">
+            <SimpleBarChart
+              items={statusItems(analytics.attendance.byStatus)}
+              title="Attendance"
+            />
+            <SimpleBarChart items={statusItems(analytics.leave.byStatus)} title="Leave" />
+            <SimpleBarChart
+              items={statusItems(analytics.visitors.byStatus)}
+              title="Visitors"
+            />
+          </div>
+        ) : (
+          <EmptyState
+            description="Analytics widgets appear after a tenant is active and the current role has analytics access."
+            title="Analytics workspace is waiting for data"
           />
-          <SimpleBarChart items={statusItems(analytics.leave.byStatus)} title="Leave" />
-          <SimpleBarChart
-            items={statusItems(analytics.visitors.byStatus)}
-            title="Visitors"
-          />
-        </div>
-      ) : (
-        <EmptyState
-          description="Analytics widgets appear after a tenant is active and the current role has analytics access."
-          title="Analytics workspace is waiting for data"
-        />
-      )}
+        )}
+        {analytics ? (
+          <ActivityFeed activity={analytics.activity} />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent operational activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">No activity to show yet.</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
-          icon={Activity}
-          label="Active beds"
-          value={`${analytics?.occupancy.occupiedBeds ?? 0}/${analytics?.occupancy.totalBeds ?? 0}`}
-        />
-        <KpiCard
+        <StatCard
           icon={BedDouble}
           label="Available beds"
           value={String(analytics?.occupancy.availableBeds ?? 0)}
         />
-        <KpiCard
+        <StatCard
           icon={CalendarCheck}
           label="Leave requests"
           value={String(analytics?.leave.total ?? 0)}
         />
-        <KpiCard
+        <StatCard
           icon={DoorOpen}
           label="Visitors"
           value={String(analytics?.visitors.total ?? 0)}
+        />
+        <StatCard
+          description="Unread operational messages"
+          icon={Bell}
+          label="Notifications"
+          tone={unreadNotifications > 0 ? "info" : "default"}
+          value={String(unreadNotifications)}
         />
       </div>
     </section>

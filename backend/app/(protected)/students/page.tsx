@@ -1,14 +1,25 @@
 import Link from "next/link";
 import type { Route } from "next";
+import { UserPlus, Users, UserX, MapPinned } from "lucide-react";
 
 import { StudentTable } from "@/components/students/student-table";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { SearchFilterBar } from "@/components/ui/search-filter-bar";
+import { StatCard } from "@/components/ui/stat-card";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { validateInput } from "@/lib/validation/zod";
 import { listStudentsQuerySchema } from "@/modules/students/schemas";
 import { listStudents } from "@/modules/students/students.service";
 
 type StudentsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+type BranchOption = {
+  id: string;
+  name: string;
 };
 
 function studentsPageHref(
@@ -40,75 +51,164 @@ function studentsPageHref(
   return `/students?${params.toString()}` as Route;
 }
 
+async function listStudentBranches(organizationId: string | undefined) {
+  if (!organizationId) {
+    return [] satisfies BranchOption[];
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from("hostel_branches")
+    .select("id,name")
+    .eq("organization_id", organizationId)
+    .is("deleted_at", null)
+    .order("name", { ascending: true });
+
+  return data ?? [];
+}
+
 export default async function StudentsPage({ searchParams }: StudentsPageProps) {
-  await requireTenantPageAccess({
+  const context = await requireTenantPageAccess({
     permission: "student:read",
     product: "hostel_erp",
   });
   const query = validateInput(listStudentsQuerySchema, await searchParams);
-  const students = await listStudents(query);
+  const [students, branches] = await Promise.all([
+    listStudents(query),
+    listStudentBranches(context.organizationId),
+  ]);
+  const branchById = new Map(branches.map((branch) => [branch.id, branch.name]));
+  const activeCount = students.data.filter((student) => student.status === "active").length;
+  const inactiveCount = students.data.filter(
+    (student) => student.status === "inactive",
+  ).length;
+  const selectedBranchName = query.hostelBranchId
+    ? branchById.get(query.hostelBranchId)
+    : undefined;
 
   return (
     <section className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">Hostel ERP</p>
-          <h2 className="text-2xl font-semibold">Students</h2>
-        </div>
-        <Link
-          className="rounded bg-slate-950 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-          href="/students/new"
-        >
-          Create student
-        </Link>
-      </div>
-      <form className="grid gap-3 rounded border border-slate-200 bg-white p-4 md:grid-cols-[1fr_160px_120px]">
-        <input
-          className="rounded border border-slate-300 px-3 py-2"
-          defaultValue={query.q ?? ""}
-          name="q"
-          placeholder="Search by code, name, email"
+      <PageHeader
+        actions={
+          <Button asChild>
+            <Link href="/students/new">
+              <UserPlus aria-hidden="true" />
+              Admit student
+            </Link>
+          </Button>
+        }
+        description="Search admissions, review active residents, and jump into room assignment, dues, attendance, and document workflows."
+        eyebrow="Hostel ERP"
+        title="Students"
+      />
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          description="Matching the current filters"
+          icon={Users}
+          label="Student records"
+          tone="info"
+          value={String(students.count)}
         />
-        <select
-          className="rounded border border-slate-300 px-3 py-2"
-          defaultValue={query.status ?? ""}
-          name="status"
+        <StatCard
+          description="Visible on this page"
+          icon={Users}
+          label="Active"
+          tone="success"
+          value={String(activeCount)}
+        />
+        <StatCard
+          description="Visible on this page"
+          icon={UserX}
+          label="Inactive"
+          tone={inactiveCount > 0 ? "warning" : "default"}
+          value={String(inactiveCount)}
+        />
+        <StatCard
+          description="Current list scope"
+          icon={MapPinned}
+          label="Branch"
+          value={selectedBranchName ?? "All branches"}
+        />
+      </div>
+
+      <form action="/students">
+        <SearchFilterBar
+          actions={
+            <Button type="submit" variant="outline">
+              Apply filters
+            </Button>
+          }
+          defaultValue={query.q ?? ""}
+          placeholder="Search by code, name, email"
         >
-          <option value="">All statuses</option>
-          <option value="active">active</option>
-          <option value="inactive">inactive</option>
-        </select>
-        <button className="rounded border border-slate-300 px-3 py-2 font-medium" type="submit">
-          Filter
-        </button>
+          <select
+            aria-label="Filter students by branch"
+            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+            defaultValue={query.hostelBranchId ?? ""}
+            name="hostelBranchId"
+          >
+            <option value="">All branches</option>
+            {branches.map((branch) => (
+              <option key={branch.id} value={branch.id}>
+                {branch.name}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="Filter students by status"
+            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+            defaultValue={query.status ?? ""}
+            name="status"
+          >
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <select
+            aria-label="Rows per page"
+            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+            defaultValue={String(query.limit)}
+            name="limit"
+          >
+            <option value="10">10 rows</option>
+            <option value="20">20 rows</option>
+            <option value="50">50 rows</option>
+            <option value="100">100 rows</option>
+          </select>
+        </SearchFilterBar>
       </form>
-      <StudentTable students={students.data} />
-      <div className="flex items-center justify-between gap-4 text-sm text-slate-500">
+      <StudentTable
+        branchNames={Object.fromEntries(branchById)}
+        canManageStudents={context.role === "admin" || context.role === "superadmin"}
+        students={students.data}
+      />
+      <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <p>
           Page {students.page} of {students.pageCount}, {students.count} total
         </p>
         <nav className="flex items-center gap-2" aria-label="Student pagination">
           {students.page > 1 ? (
             <Link
-              className="rounded border border-slate-300 px-3 py-2 font-medium text-slate-900"
+              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-accent"
               href={studentsPageHref(query, students.page - 1)}
             >
               Previous
             </Link>
           ) : (
-            <span className="rounded border border-slate-200 px-3 py-2 text-slate-400">
+            <span className="rounded-md border border-border px-3 py-2 text-muted-foreground opacity-60">
               Previous
             </span>
           )}
           {students.page < students.pageCount ? (
             <Link
-              className="rounded border border-slate-300 px-3 py-2 font-medium text-slate-900"
+              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-accent"
               href={studentsPageHref(query, students.page + 1)}
             >
               Next
             </Link>
           ) : (
-            <span className="rounded border border-slate-200 px-3 py-2 text-slate-400">
+            <span className="rounded-md border border-border px-3 py-2 text-muted-foreground opacity-60">
               Next
             </span>
           )}

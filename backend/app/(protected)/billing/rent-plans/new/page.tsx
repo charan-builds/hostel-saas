@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { RentPlanForm } from "@/components/billing/rent-plan-form";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { getBillingFormOptions } from "@/modules/billing/billing.service";
 
@@ -13,18 +15,16 @@ export default async function NewRentPlanPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">Billing setup</p>
-          <h2 className="text-2xl font-semibold">Create rent plan</h2>
-        </div>
-        <Link
-          className="rounded border border-slate-300 px-4 py-2 text-sm font-medium"
-          href="/billing"
-        >
-          Back to billing
-        </Link>
-      </div>
+      <PageHeader
+        actions={
+          <Button asChild variant="outline">
+            <Link href="/billing">Back to billing</Link>
+          </Button>
+        }
+        description="Create branch, room, bed, or student-specific rent rules for monthly invoice generation."
+        eyebrow="Billing setup"
+        title="Create rent plan"
+      />
       <RentPlanForm
         beds={options.beds}
         branches={options.branches}

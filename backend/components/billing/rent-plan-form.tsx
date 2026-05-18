@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { createRentPlanAction } from "@/modules/billing/actions";
 import type { RentPlan } from "@/modules/billing/billing.service";
 
@@ -44,6 +45,9 @@ type RentPlanFormProps = {
   students: StudentOption[];
 };
 
+const fieldClassName =
+  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+
 export function RentPlanForm({
   beds,
   branches,
@@ -55,14 +59,14 @@ export function RentPlanForm({
   return (
     <form
       action={createRentPlanAction}
-      className="space-y-6 rounded border border-slate-200 bg-white p-6"
+      className="space-y-6 rounded-lg border border-border bg-card p-5 text-card-foreground shadow-sm"
     >
       <input name="organizationId" type="hidden" value={organizationId} />
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Branch</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="hostelBranchId"
             required
           >
@@ -73,28 +77,28 @@ export function RentPlanForm({
             ))}
           </select>
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Plan code</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="code"
             placeholder="BRANCH-MONTHLY"
             required
           />
         </label>
-        <label className="space-y-1 md:col-span-2">
+        <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-medium">Plan name</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="name"
             placeholder="Monthly hostel rent"
             required
           />
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Scope</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="scopeType"
           >
             <option value="branch">Branch default</option>
@@ -103,10 +107,10 @@ export function RentPlanForm({
             <option value="student">Student</option>
           </select>
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Status</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="status"
           >
             <option value="active">active</option>
@@ -114,10 +118,10 @@ export function RentPlanForm({
             <option value="archived">archived</option>
           </select>
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Room</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="roomId"
           >
             <option value="">Not scoped to a room</option>
@@ -128,10 +132,10 @@ export function RentPlanForm({
             ))}
           </select>
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Bed</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="bedId"
           >
             <option value="">Not scoped to a bed</option>
@@ -142,10 +146,10 @@ export function RentPlanForm({
             ))}
           </select>
         </label>
-        <label className="space-y-1 md:col-span-2">
+        <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-medium">Student</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="studentId"
           >
             <option value="">Not scoped to a student</option>
@@ -156,10 +160,10 @@ export function RentPlanForm({
             ))}
           </select>
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Monthly amount</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             min={0}
             name="amountCents"
             placeholder="120000"
@@ -167,19 +171,19 @@ export function RentPlanForm({
             type="number"
           />
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Currency</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue="INR"
             maxLength={3}
             name="currencyCode"
           />
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Due day</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={5}
             max={28}
             min={1}
@@ -187,46 +191,43 @@ export function RentPlanForm({
             type="number"
           />
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Monthly discount</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={0}
             min={0}
             name="monthlyDiscountCents"
             type="number"
           />
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Starts on</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={new Date().toISOString().slice(0, 10)}
             name="startsOn"
             type="date"
           />
         </label>
-        <label className="space-y-1">
+        <label className="space-y-2">
           <span className="text-sm font-medium">Ends on</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="endsOn"
             type="date"
           />
         </label>
       </div>
-      <div className="rounded border border-slate-200 bg-slate-50 p-4">
+      <div className="rounded-md border border-border bg-muted/50 p-4">
         <p className="text-sm font-medium">Existing plans</p>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-muted-foreground">
           {rentPlans.length} active or historical plan records in this tenant scope.
         </p>
       </div>
-      <button
-        className="rounded bg-slate-950 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        type="submit"
-      >
+      <Button type="submit">
         Create rent plan
-      </button>
+      </Button>
     </form>
   );
 }

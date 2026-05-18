@@ -3,6 +3,8 @@ import Link from "next/link";
 import { NoticeForm } from "@/components/notifications/notice-form";
 import { NoticeList } from "@/components/notifications/notice-list";
 import { ReminderAutomationForm } from "@/components/notifications/reminder-automation-form";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import {
   getNoticeManagementOptions,
@@ -25,18 +27,16 @@ export default async function ManageNoticesPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">Admin</p>
-          <h2 className="text-2xl font-semibold">Notice management</h2>
-        </div>
-        <Link
-          className="rounded border border-slate-300 px-4 py-2 text-sm font-medium"
-          href="/notices"
-        >
-          View board
-        </Link>
-      </div>
+      <PageHeader
+        actions={
+          <Button asChild variant="outline">
+            <Link href="/notices">View board</Link>
+          </Button>
+        }
+        description="Publish operational notices and prepare reminder automations for background workers."
+        eyebrow="Admin"
+        title="Notice management"
+      />
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <NoticeForm
           branches={options.branches}

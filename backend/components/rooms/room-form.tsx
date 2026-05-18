@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import type { Database } from "@/types/database.types";
 import {
   createRoomAction,
@@ -32,6 +34,12 @@ type RoomFormProps = {
   templates: TemplateOption[];
 };
 
+const fieldClassName =
+  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2";
+
+const textAreaClassName =
+  "min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2";
+
 export function RoomForm({
   branches,
   categories,
@@ -57,14 +65,14 @@ export function RoomForm({
     <div className="space-y-6">
       <form
         action={action}
-        className="grid gap-5 rounded border border-slate-200 bg-white p-6 md:grid-cols-2"
+        className="grid gap-5 rounded-lg border border-border bg-card p-6 shadow-sm md:grid-cols-2"
       >
         <input name="organizationId" type="hidden" value={organizationId} />
         {room ? <input name="roomId" type="hidden" value={room.id} /> : null}
         <label className="space-y-1">
           <span className="text-sm font-medium">Room code</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.room_code}
             name="roomCode"
             required
@@ -73,7 +81,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Room name</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.name}
             name="name"
             required
@@ -82,7 +90,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Hostel branch</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={selectedBranchId}
             name="hostelBranchId"
             required
@@ -97,7 +105,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Floor</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.floor_id ?? ""}
             name="floorId"
           >
@@ -112,7 +120,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Template</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.template_id ?? ""}
             name="templateId"
           >
@@ -127,7 +135,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Category</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.category_id ?? ""}
             name="categoryId"
           >
@@ -142,7 +150,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Room type key</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.room_type ?? "standard"}
             name="roomType"
             required
@@ -151,7 +159,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Status</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.status ?? "active"}
             name="status"
           >
@@ -164,7 +172,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Floor</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.floor ?? ""}
             name="floor"
           />
@@ -172,7 +180,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Capacity</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.capacity ?? 1}
             min={1}
             name="capacity"
@@ -183,14 +191,14 @@ export function RoomForm({
         <label className="space-y-1 md:col-span-2">
           <span className="text-sm font-medium">Custom bed labels</span>
           <textarea
-            className="min-h-24 w-full rounded border border-slate-300 px-3 py-2"
+            className={textAreaClassName}
             name="bedLabels"
           />
         </label>
         <label className="space-y-1">
           <span className="text-sm font-medium">Monthly rate cents</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.monthly_rate_cents ?? 0}
             min={0}
             name="monthlyRateCents"
@@ -200,7 +208,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Security deposit cents</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={room?.security_deposit_cents ?? 0}
             min={0}
             name="securityDepositCents"
@@ -210,7 +218,7 @@ export function RoomForm({
         <label className="space-y-1">
           <span className="text-sm font-medium">Currency</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2 uppercase"
+            className={`${fieldClassName} uppercase`}
             defaultValue={room?.currency_code ?? "INR"}
             maxLength={3}
             minLength={3}
@@ -218,29 +226,32 @@ export function RoomForm({
           />
         </label>
         <div className="md:col-span-2">
-          <button
-            className="rounded bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-800"
-            type="submit"
-          >
+          <Button type="submit">
             {isEditing ? "Save room" : "Create room"}
-          </button>
+          </Button>
         </div>
       </form>
       {room ? (
-        <form
-          action={softDeleteRoomAction}
-          className="rounded border border-red-200 bg-white p-6"
-        >
-          <input name="roomId" type="hidden" value={room.id} />
-          <input name="organizationId" type="hidden" value={organizationId} />
-          <input name="hostelBranchId" type="hidden" value={room.hostel_branch_id} />
-          <button
-            className="rounded border border-red-300 px-4 py-2 font-medium text-red-700 hover:bg-red-50"
-            type="submit"
-          >
-            Delete room
-          </button>
-        </form>
+        <Card className="border-destructive/30">
+          <CardContent className="p-6">
+            <form action={softDeleteRoomAction} className="space-y-3">
+              <input name="roomId" type="hidden" value={room.id} />
+              <input name="organizationId" type="hidden" value={organizationId} />
+              <input
+                name="hostelBranchId"
+                type="hidden"
+                value={room.hostel_branch_id}
+              />
+              <p className="text-sm text-muted-foreground">
+                Soft delete this room only when it should no longer appear in
+                operational room assignment workflows.
+              </p>
+              <Button type="submit" variant="destructive">
+                Delete room
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       ) : null}
     </div>
   );

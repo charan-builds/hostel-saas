@@ -1,7 +1,11 @@
 import type { Route } from "next";
 import Link from "next/link";
+import { BedDouble, DoorOpen, IndianRupee, Wrench } from "lucide-react";
 
 import { BedGrid } from "@/components/rooms/bed-grid";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatCard } from "@/components/ui/stat-card";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { getRoom } from "@/modules/rooms/rooms.service";
 
@@ -29,44 +33,44 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
 
   return (
     <section className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">
-            {details.room.room_code}
-          </p>
-          <h2 className="text-2xl font-semibold">{details.room.name}</h2>
-        </div>
-        <Link
-          className="rounded border border-slate-300 px-4 py-2 text-sm font-medium"
-          href={`/rooms/${details.room.id}/edit` as Route}
-        >
-          Edit room
-        </Link>
-      </div>
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm font-medium text-slate-500">Type</p>
-          <p className="mt-2 font-semibold">{details.room.room_type}</p>
-        </div>
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm font-medium text-slate-500">Status</p>
-          <p className="mt-2 font-semibold">{details.room.status}</p>
-        </div>
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm font-medium text-slate-500">Monthly rate</p>
-          <p className="mt-2 font-semibold">
-            {formatMoney(details.room.monthly_rate_cents, details.room.currency_code)}
-          </p>
-        </div>
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm font-medium text-slate-500">Deposit</p>
-          <p className="mt-2 font-semibold">
-            {formatMoney(
-              details.room.security_deposit_cents,
-              details.room.currency_code,
-            )}
-          </p>
-        </div>
+      <PageHeader
+        actions={
+          <Button asChild variant="outline">
+            <Link href={`/rooms/${details.room.id}/edit` as Route}>Edit room</Link>
+          </Button>
+        }
+        description="Review bed inventory, occupancy, status changes, and student transfer actions."
+        eyebrow={details.room.room_code}
+        title={details.room.name}
+      />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          icon={DoorOpen}
+          label="Room type"
+          value={details.room.room_type}
+        />
+        <StatCard
+          icon={Wrench}
+          label="Status"
+          tone={details.room.status === "active" ? "success" : "warning"}
+          value={details.room.status}
+        />
+        <StatCard
+          icon={IndianRupee}
+          label="Monthly rate"
+          value={formatMoney(
+            details.room.monthly_rate_cents,
+            details.room.currency_code,
+          )}
+        />
+        <StatCard
+          icon={BedDouble}
+          label="Deposit"
+          value={formatMoney(
+            details.room.security_deposit_cents,
+            details.room.currency_code,
+          )}
+        />
       </div>
       <BedGrid
         availableBeds={details.availableBeds}

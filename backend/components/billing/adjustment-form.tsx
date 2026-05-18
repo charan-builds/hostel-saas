@@ -1,3 +1,16 @@
+"use client";
+
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   addInvoiceAdjustmentAction,
   voidBillingInvoiceAction,
@@ -8,91 +21,93 @@ type AdjustmentFormProps = {
   invoice: BillingInvoice;
 };
 
+const selectClassName =
+  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+
 export function AdjustmentForm({ invoice }: AdjustmentFormProps) {
   const canAdjust = invoice.status !== "void";
   const canVoid = invoice.status !== "void" && invoice.paid_cents === 0;
+  const [adjustmentAmount, setAdjustmentAmount] = useState("");
+  const adjustmentAmountCents = Math.round(Number(adjustmentAmount || 0) * 100);
+  const adjustmentAmountValid =
+    Number.isFinite(adjustmentAmountCents) && adjustmentAmountCents > 0;
 
   return (
     <div className="space-y-4">
-      <form
-        action={addInvoiceAdjustmentAction}
-        className="space-y-4 rounded border border-slate-200 bg-white p-5"
-      >
-        <input name="invoiceId" type="hidden" value={invoice.id} />
-        <div>
-          <p className="text-sm font-medium text-slate-500">Adjust invoice</p>
-          <p className="mt-1 text-sm text-slate-600">
+      <Card>
+        <CardHeader>
+          <CardTitle>Adjust invoice</CardTitle>
+          <CardDescription>
             Add penalties, fines, discounts, or manual corrections.
-          </p>
-        </div>
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">Adjustment type</span>
-          <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
-            disabled={!canAdjust}
-            name="itemType"
-          >
-            <option value="penalty">penalty</option>
-            <option value="fine">fine</option>
-            <option value="discount">discount</option>
-            <option value="adjustment">adjustment</option>
-          </select>
-        </label>
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">Description</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
-            disabled={!canAdjust}
-            name="description"
-            required
-          />
-        </label>
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">Amount</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
-            disabled={!canAdjust}
-            min={1}
-            name="amountCents"
-            required
-            type="number"
-          />
-        </label>
-        <button
-          className="rounded border border-slate-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:bg-slate-100"
-          disabled={!canAdjust}
-          type="submit"
-        >
-          Apply adjustment
-        </button>
-      </form>
-      <form
-        action={voidBillingInvoiceAction}
-        className="space-y-4 rounded border border-rose-200 bg-white p-5"
-      >
-        <input name="invoiceId" type="hidden" value={invoice.id} />
-        <div>
-          <p className="text-sm font-medium text-rose-700">Void invoice</p>
-          <p className="mt-1 text-sm text-slate-600">
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={addInvoiceAdjustmentAction} className="space-y-4">
+            <input name="invoiceId" type="hidden" value={invoice.id} />
+            <label className="block space-y-2">
+              <span className="text-sm font-medium">Adjustment type</span>
+              <select
+                className={selectClassName}
+                disabled={!canAdjust}
+                name="itemType"
+              >
+                <option value="penalty">Penalty</option>
+                <option value="fine">Fine</option>
+                <option value="discount">Discount</option>
+                <option value="adjustment">Adjustment</option>
+              </select>
+            </label>
+            <label className="block space-y-2">
+              <span className="text-sm font-medium">Description</span>
+              <Input disabled={!canAdjust} name="description" required />
+            </label>
+            <label className="block space-y-2">
+              <span className="text-sm font-medium">Amount</span>
+              <input
+                name="amountCents"
+                type="hidden"
+                value={adjustmentAmountValid ? adjustmentAmountCents : 0}
+              />
+              <Input
+                disabled={!canAdjust}
+                inputMode="decimal"
+                min={0.01}
+                onChange={(event) => setAdjustmentAmount(event.target.value)}
+                step="0.01"
+                type="number"
+                value={adjustmentAmount}
+              />
+            </label>
+            <Button
+              disabled={!canAdjust || !adjustmentAmountValid}
+              type="submit"
+              variant="outline"
+            >
+              Apply adjustment
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-destructive">Void invoice</CardTitle>
+          <CardDescription>
             Only unpaid invoices can be voided.
-          </p>
-        </div>
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">Reason</span>
-          <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
-            disabled={!canVoid}
-            name="reason"
-          />
-        </label>
-        <button
-          className="rounded border border-rose-300 px-4 py-2 text-sm font-medium text-rose-700 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"
-          disabled={!canVoid}
-          type="submit"
-        >
-          Void invoice
-        </button>
-      </form>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={voidBillingInvoiceAction} className="space-y-4">
+            <input name="invoiceId" type="hidden" value={invoice.id} />
+            <label className="block space-y-2">
+              <span className="text-sm font-medium">Reason</span>
+              <Input disabled={!canVoid} name="reason" />
+            </label>
+            <Button disabled={!canVoid} type="submit" variant="destructive">
+              Void invoice
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

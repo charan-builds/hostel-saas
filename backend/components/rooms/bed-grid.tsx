@@ -1,3 +1,10 @@
+import { BedDouble, CheckCircle, DoorOpen, Gauge } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/state";
+import { StatusChip } from "@/components/ui/status-chip";
+import { StatCard } from "@/components/ui/stat-card";
 import type { Database } from "@/types/database.types";
 import type { BedWithOccupant, RoomOccupancy } from "@/modules/rooms/rooms.service";
 import {
@@ -22,24 +29,27 @@ type BedGridProps = {
   room: RoomRow;
 };
 
+const fieldClassName =
+  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2";
+
 function bedStatusClass(status: string) {
   if (status === "occupied") {
-    return "border-emerald-300 bg-emerald-50";
+    return "border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950";
   }
 
   if (status === "available") {
-    return "border-sky-300 bg-sky-50";
+    return "border-sky-300 bg-sky-50 dark:border-sky-900 dark:bg-sky-950";
   }
 
   if (status === "reserved") {
-    return "border-violet-300 bg-violet-50";
+    return "border-violet-300 bg-violet-50 dark:border-violet-900 dark:bg-violet-950";
   }
 
   if (status === "maintenance" || status === "unavailable") {
-    return "border-amber-300 bg-amber-50";
+    return "border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950";
   }
 
-  return "border-slate-200 bg-slate-50";
+  return "border-border bg-card";
 }
 
 export function BedGrid({
@@ -53,27 +63,34 @@ export function BedGrid({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm font-medium text-slate-500">Beds</p>
-          <p className="mt-2 text-2xl font-semibold">{occupancy.bedCount}</p>
-        </div>
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm font-medium text-slate-500">Occupied</p>
-          <p className="mt-2 text-2xl font-semibold">{occupancy.occupiedBeds}</p>
-        </div>
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm font-medium text-slate-500">Vacant</p>
-          <p className="mt-2 text-2xl font-semibold">{occupancy.availableBeds}</p>
-        </div>
-        <div className="rounded border border-slate-200 bg-white p-4">
-          <p className="text-sm font-medium text-slate-500">Occupancy</p>
-          <p className="mt-2 text-2xl font-semibold">{occupancy.occupancyRate}%</p>
-        </div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          icon={BedDouble}
+          label="Beds"
+          value={String(occupancy.bedCount)}
+        />
+        <StatCard
+          icon={CheckCircle}
+          label="Occupied"
+          tone="success"
+          value={String(occupancy.occupiedBeds)}
+        />
+        <StatCard
+          icon={DoorOpen}
+          label="Vacant"
+          tone="info"
+          value={String(occupancy.availableBeds)}
+        />
+        <StatCard
+          icon={Gauge}
+          label="Occupancy"
+          tone={occupancy.occupancyRate >= 90 ? "warning" : "default"}
+          value={`${occupancy.occupancyRate}%`}
+        />
       </div>
       <form
         action={createRoomBedAction}
-        className="grid gap-4 rounded border border-slate-200 bg-white p-6 md:grid-cols-[1fr_120px_160px_auto]"
+        className="grid gap-4 rounded-lg border border-border bg-card p-6 shadow-sm md:grid-cols-[1fr_120px_160px_auto]"
       >
         <input name="roomId" type="hidden" value={room.id} />
         <input name="organizationId" type="hidden" value={room.organization_id} />
@@ -81,7 +98,7 @@ export function BedGrid({
         <label className="space-y-1">
           <span className="text-sm font-medium">Bed code</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             name="bedCode"
             required
           />
@@ -89,7 +106,7 @@ export function BedGrid({
         <label className="space-y-1">
           <span className="text-sm font-medium">Order</span>
           <input
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue={beds.length + 1}
             min={0}
             name="sortOrder"
@@ -99,7 +116,7 @@ export function BedGrid({
         <label className="space-y-1">
           <span className="text-sm font-medium">Status</span>
           <select
-            className="w-full rounded border border-slate-300 px-3 py-2"
+            className={fieldClassName}
             defaultValue="available"
             name="status"
           >
@@ -110,44 +127,46 @@ export function BedGrid({
             <option value="inactive">inactive</option>
           </select>
         </label>
-        <button
-          className="self-end rounded bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-800"
-          type="submit"
-        >
+        <Button className="self-end" type="submit">
           Add bed
-        </button>
+        </Button>
       </form>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {beds.length === 0 ? (
-          <div className="rounded border border-slate-200 bg-white p-6 text-sm text-slate-500">
-            No beds have been created for this room.
-          </div>
+          <EmptyState
+            description="Add beds manually or adjust room capacity from the room form."
+            title="No beds have been created"
+          />
         ) : (
           beds.map((bed) => (
             <div
-              className={`space-y-4 rounded border p-4 ${bedStatusClass(bed.status)}`}
+              className={`space-y-4 rounded-lg border p-4 shadow-sm ${bedStatusClass(bed.status)}`}
               key={bed.id}
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold">{bed.bed_code}</p>
-                  <p className="text-sm text-slate-600">{bed.status}</p>
+                  <div className="mt-1">
+                    <StatusChip status={bed.status} />
+                  </div>
                 </div>
-                <span className="rounded bg-white/80 px-2 py-1 text-xs font-medium">
+                <span className="rounded bg-background/80 px-2 py-1 text-xs font-medium">
                   #{bed.sort_order}
                 </span>
               </div>
               {bed.occupant ? (
-                <div className="rounded bg-white/80 p-3 text-sm">
+                <div className="rounded bg-background/80 p-3 text-sm">
                   <p className="font-medium">
                     {bed.occupant.first_name} {bed.occupant.last_name}
                   </p>
-                  <p className="text-slate-600">{bed.occupant.student_code}</p>
+                  <p className="text-muted-foreground">
+                    {bed.occupant.student_code}
+                  </p>
                 </div>
               ) : null}
               {bed.activeAssignment && bed.occupant ? (
                 <div className="space-y-3">
-                  <details className="rounded bg-white/80 p-3">
+                  <details className="rounded bg-background/80 p-3">
                     <summary className="cursor-pointer text-sm font-medium">
                       Transfer
                     </summary>
@@ -165,7 +184,7 @@ export function BedGrid({
                       <input name="studentId" type="hidden" value={bed.occupant.id} />
                       <input name="redirectRoomId" type="hidden" value={room.id} />
                       <select
-                        className="w-full rounded border border-slate-300 px-3 py-2"
+                        className={fieldClassName}
                         name="targetBedId"
                         required
                       >
@@ -181,17 +200,13 @@ export function BedGrid({
                           );
                         })}
                       </select>
-                      <input
-                        className="w-full rounded border border-slate-300 px-3 py-2"
+                      <Input
                         name="transferReason"
                         placeholder="Reason"
                       />
-                      <button
-                        className="rounded border border-slate-300 px-3 py-2 font-medium"
-                        type="submit"
-                      >
+                      <Button type="submit" variant="outline">
                         Transfer student
-                      </button>
+                      </Button>
                     </form>
                   </details>
                   <form action={unassignStudentBedAction} className="space-y-3">
@@ -211,17 +226,13 @@ export function BedGrid({
                       value={room.hostel_branch_id}
                     />
                     <input name="redirectRoomId" type="hidden" value={room.id} />
-                    <input
-                      className="w-full rounded border border-slate-300 bg-white px-3 py-2"
+                    <Input
                       name="reason"
                       placeholder="Unassign reason"
                     />
-                    <button
-                      className="rounded border border-slate-300 bg-white px-3 py-2 font-medium"
-                      type="submit"
-                    >
+                    <Button type="submit" variant="outline">
                       Unassign
-                    </button>
+                    </Button>
                   </form>
                 </div>
               ) : (
@@ -239,7 +250,7 @@ export function BedGrid({
                   />
                   <input name="redirectRoomId" type="hidden" value={room.id} />
                   <select
-                    className="w-full rounded border border-slate-300 bg-white px-3 py-2"
+                    className={fieldClassName}
                     defaultValue={bed.status}
                     name="status"
                   >
@@ -249,18 +260,14 @@ export function BedGrid({
                     <option value="unavailable">unavailable</option>
                     <option value="inactive">inactive</option>
                   </select>
-                  <input
-                    className="w-full rounded border border-slate-300 bg-white px-3 py-2"
+                  <Input
                     defaultValue={bed.status_reason ?? ""}
                     name="statusReason"
                     placeholder="Status reason"
                   />
-                  <button
-                    className="rounded border border-slate-300 bg-white px-3 py-2 font-medium"
-                    type="submit"
-                  >
+                  <Button type="submit" variant="outline">
                     Update status
-                  </button>
+                  </Button>
                 </form>
               )}
             </div>

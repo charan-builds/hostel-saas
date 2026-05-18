@@ -1,4 +1,5 @@
 import { RoomForm } from "@/components/rooms/room-form";
+import { PageHeader } from "@/components/ui/page-header";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { getRoom, getRoomFormOptions } from "@/modules/rooms/rooms.service";
 
@@ -19,12 +20,11 @@ export default async function EditRoomPage({ params }: EditRoomPageProps) {
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-sm font-medium text-slate-500">
-          {roomDetails.room.room_code}
-        </p>
-        <h2 className="text-2xl font-semibold">Edit {roomDetails.room.name}</h2>
-      </div>
+      <PageHeader
+        description="Adjust room metadata, capacity, pricing, and operational status."
+        eyebrow={roomDetails.room.room_code}
+        title={`Edit ${roomDetails.room.name}`}
+      />
       <RoomForm
         branches={options.branches}
         categories={options.categories}
