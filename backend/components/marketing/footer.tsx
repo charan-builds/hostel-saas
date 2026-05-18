@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
+import type { Route } from "next";
+
 import { websiteConfig } from "@/config/website-config";
 
 export function Footer() {
@@ -53,7 +54,7 @@ export function Footer() {
             <ul className="space-y-3">
               {websiteConfig.mainNav.slice(0, 4).map((item) => (
                 <li key={item.title}>
-                  <Link href={item.href as any} className="text-sm hover:text-white transition-colors">
+                  <Link href={item.href as Route} className="text-sm hover:text-white transition-colors">
                     {item.title}
                   </Link>
                 </li>

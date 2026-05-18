@@ -46,6 +46,9 @@ const testEnv = {
 if (mode === "--contracts") {
   process.env.RUN_SUPABASE_INTEGRATION_TESTS = "0";
   testEnv.RUN_SUPABASE_INTEGRATION_TESTS = "0";
+  console.warn(
+    "Running integration contract discovery only; real Supabase tests are skipped. Use test:integration:supabase or test:integration:local for DB-backed execution.",
+  );
 } else {
   process.env.RUN_SUPABASE_INTEGRATION_TESTS = "1";
   testEnv.RUN_SUPABASE_INTEGRATION_TESTS = "1";

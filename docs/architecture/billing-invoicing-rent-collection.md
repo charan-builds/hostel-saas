@@ -36,9 +36,17 @@ Billing admins can manage branch billing through `private.is_billing_admin`. Stu
 - `backend/app/api/v1/billing/*` exposes typed route-handler APIs for integrations.
 - `backend/components/billing/*` keeps UI concerns out of the domain service.
 
-## Cashfree Readiness
+## Cashfree Online Payment Orchestration
 
-The schema includes `cashfree_config` on rent plans and `cashfree_order_id` / `cashfree_payment_session_id` on invoices. Manual payments use the same `billing_payments` and `billing_payment_allocations` ledger that Cashfree webhook handlers should use later, which avoids a second payment model.
+Cashfree is integrated as a provider layer on top of the existing billing ledger:
+
+- `POST /api/v1/billing/invoices/[invoiceId]/payment-session` creates or reuses a Cashfree order for payable invoices.
+- `POST /api/webhooks/cashfree` verifies the Cashfree raw-body signature before recording payment.
+- Provider code lives under `backend/lib/payments/providers/cashfree/`, behind the generic `backend/lib/payments/payment-provider.ts` boundary.
+- Cashfree callbacks never mark invoices as paid from the browser return URL. Only the verified webhook calls `record_invoice_payment`.
+- Webhook finalization uses the existing provider reference, provider event ID, and idempotency indexes, so repeated webhook deliveries return the original payment instead of double-recording money.
+
+The provider layer is intentionally small so Razorpay, Stripe, or PhonePe can be added later without changing invoice, allocation, receipt, or audit tables.
 
 ## Extensibility
 

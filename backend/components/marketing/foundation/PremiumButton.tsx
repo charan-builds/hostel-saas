@@ -1,13 +1,23 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
+import type { Route } from "next";
 import { ReactNode } from "react";
+
+type ExternalHref =
+  | `http://${string}`
+  | `https://${string}`
+  | `mailto:${string}`
+  | `tel:${string}`;
 
 interface PremiumButtonProps {
   children: ReactNode;
-  href?: string;
+  href?: ExternalHref | Route;
   onClick?: () => void;
   variant?: "primary" | "secondary" | "outline" | "ghost";
   className?: string;
+}
+
+function isExternalHref(href: ExternalHref | Route): href is ExternalHref {
+  return /^(https?:|mailto:|tel:)/.test(href);
 }
 
 export function PremiumButton({ children, href, onClick, variant = "primary", className = "" }: PremiumButtonProps) {
@@ -23,8 +33,22 @@ export function PremiumButton({ children, href, onClick, variant = "primary", cl
   const buttonClasses = `${baseStyles} ${variants[variant]} ${className}`;
 
   if (href) {
+    if (isExternalHref(href)) {
+      return (
+        <a
+          className={buttonClasses}
+          href={href}
+          {...(onClick ? { onClick } : {})}
+          rel="noreferrer"
+          target="_blank"
+        >
+          {children}
+        </a>
+      );
+    }
+
     return (
-      <Link href={href as any} className={buttonClasses}>
+      <Link href={href} className={buttonClasses} {...(onClick ? { onClick } : {})}>
         {children}
       </Link>
     );

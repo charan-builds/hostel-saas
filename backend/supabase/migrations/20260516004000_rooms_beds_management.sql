@@ -289,7 +289,6 @@ declare
   v_bed_ids uuid[] := array[]::uuid[];
   v_bed_id uuid;
   v_bed_label text;
-  v_index integer;
 begin
   if p_actor_user_id <> (select auth.uid()) then
     raise exception 'Actor mismatch' using errcode = '42501';
@@ -482,7 +481,6 @@ declare
   v_bed_id uuid;
   v_bed_ids uuid[] := array[]::uuid[];
   v_bed_label text;
-  v_index integer;
 begin
   if p_actor_user_id <> (select auth.uid()) then
     raise exception 'Actor mismatch' using errcode = '42501';

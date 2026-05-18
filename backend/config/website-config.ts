@@ -3,6 +3,7 @@ import { Home, Info, Phone, BedDouble, Building, Image as ImageIcon } from "luci
 export const websiteConfig = {
   name: "Hostel Name",
   tagline: "Elegant, Warm, and Premium Stays",
+  description: "Experience world-class student housing with modern amenities, vibrant community, and everything you need to succeed.",
   logo: "Hostel Logo", // Can be text or image URL
   contact: {
     email: "contact@hostel.com",
@@ -15,6 +16,7 @@ export const websiteConfig = {
     instagram: "https://instagram.com",
     facebook: "https://facebook.com",
     twitter: "https://twitter.com",
+    github: "https://github.com",
   },
   mainNav: [
     { title: "Home", href: "/", icon: Home },
@@ -25,4 +27,4 @@ export const websiteConfig = {
     { title: "About", href: "/about", icon: Info },
     { title: "Contact", href: "/contact", icon: Phone },
   ],
-};
+} as const;

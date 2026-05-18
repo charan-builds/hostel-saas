@@ -1,12 +1,22 @@
 import "server-only";
 
+import { randomUUID } from "node:crypto";
+
 import { z } from "zod";
 
 import { recordAuditEvent } from "@/lib/audit/log";
 import { requirePermission } from "@/lib/auth/guards";
+import { publicEnv } from "@/lib/config/public-env";
 import { AppError } from "@/lib/http/errors";
+import type { PaymentSession } from "@/lib/payments/payment-provider";
+import {
+  createCashfreePaymentProvider,
+} from "@/lib/payments/providers/cashfree/cashfree-provider";
+import type { CashfreeWebhookPayload } from "@/lib/payments/providers/cashfree/types";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
+  getInvoiceByCashfreeOrderId,
   getInvoiceById,
   listBillingFormOptions,
   listInvoiceItems,
@@ -20,6 +30,7 @@ import {
 } from "@/modules/billing/billing.repository";
 import type {
   AddInvoiceAdjustmentInput,
+  CreatePaymentSessionInput,
   CreateRentPlanInput,
   GenerateMonthlyInvoicesInput,
   ListInvoicesQuery,
@@ -40,10 +51,12 @@ export type RentPlan = Database["public"]["Tables"]["rent_plans"]["Row"];
 export type BillingStudentSummary = Pick<
   Database["public"]["Tables"]["students"]["Row"],
   | "first_name"
+  | "email"
   | "hostel_branch_id"
   | "id"
   | "last_name"
   | "organization_id"
+  | "phone"
   | "status"
   | "student_code"
 >;
@@ -72,6 +85,16 @@ const paymentRecordResultSchema = z.object({
   paymentId: z.string().uuid(),
   receiptId: z.string().uuid(),
   receiptNumber: z.string(),
+});
+
+const paymentSessionResultSchema = z.object({
+  amountCents: z.number().int().positive(),
+  checkoutMode: z.literal("cashfree_payment_session"),
+  currencyCode: z.string(),
+  expiresAt: z.string().optional(),
+  orderId: z.string(),
+  paymentSessionId: z.string(),
+  provider: z.literal("cashfree"),
 });
 
 const invoiceAdjustmentResultSchema = z.object({
@@ -195,6 +218,36 @@ function buildBillingSummary(
       totalCents: 0,
     },
   );
+}
+
+function isPayableInvoice(invoice: BillingInvoice) {
+  return ["pending", "partially_paid", "overdue"].includes(invoice.status);
+}
+
+function buildCashfreeOrderId(invoiceId: string, suffix?: string) {
+  const compactInvoiceId = invoiceId.replaceAll("-", "");
+
+  if (!suffix) {
+    return `h_${compactInvoiceId}`;
+  }
+
+  return `h_${compactInvoiceId.slice(0, 26)}_${suffix.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 12)}`;
+}
+
+function buildAbsoluteUrl(pathname: string) {
+  return new URL(pathname, publicEnv.NEXT_PUBLIC_APP_URL);
+}
+
+function formatStudentName(student: BillingStudentSummary | undefined) {
+  if (!student) {
+    return undefined;
+  }
+
+  return [student.first_name, student.last_name].filter(Boolean).join(" ") || undefined;
+}
+
+function cashfreeAmountToCents(amount: number) {
+  return Math.round(amount * 100);
 }
 
 export async function listInvoices(input: ListInvoicesQuery) {
@@ -521,6 +574,291 @@ export async function recordInvoicePayment(input: RecordInvoicePaymentInput) {
     data,
     "Payment recording returned an invalid response.",
   );
+}
+
+export async function createInvoicePaymentSession(input: CreatePaymentSessionInput) {
+  const supabase = await createSupabaseServerClient();
+  const { data: invoice, error: invoiceError } = await getInvoiceById(
+    supabase,
+    input.invoiceId,
+  );
+
+  if (invoiceError) {
+    throw mapDatabaseError(invoiceError);
+  }
+
+  if (!invoice) {
+    throw new AppError({
+      code: "NOT_FOUND",
+      message: "Invoice was not found.",
+      statusCode: 404,
+    });
+  }
+
+  const context = await requirePermission("payment:record", {
+    hostelBranchId: invoice.hostel_branch_id,
+    organizationId: invoice.organization_id,
+    product: "hostel_erp",
+  });
+
+  if (!isPayableInvoice(invoice) || invoice.balance_cents <= 0) {
+    throw new AppError({
+      code: "CONFLICT",
+      message: "Only unpaid, partially paid, or overdue invoices can be paid online.",
+      statusCode: 409,
+    });
+  }
+
+  const provider = createCashfreePaymentProvider();
+  const existingOrderId = invoice.cashfree_order_id;
+
+  if (existingOrderId) {
+    const existingOrder = await provider.getOrder(
+      existingOrderId,
+      input.requestId ?? randomUUID(),
+    );
+
+    if (
+      existingOrder?.paymentSessionId &&
+      (existingOrder.status === "active" || existingOrder.status === "unknown")
+    ) {
+      if (invoice.cashfree_payment_session_id !== existingOrder.paymentSessionId) {
+        const { error: updateError } = await supabase
+          .from("billing_invoices")
+          .update({
+            cashfree_payment_session_id: existingOrder.paymentSessionId,
+            updated_by: context.identity.userId,
+          })
+          .eq("id", invoice.id)
+          .eq("organization_id", invoice.organization_id)
+          .eq("hostel_branch_id", invoice.hostel_branch_id)
+          .is("deleted_at", null);
+
+        if (updateError) {
+          throw mapDatabaseError(updateError);
+        }
+      }
+
+      return paymentSessionResultSchema.parse({
+        amountCents: existingOrder.amountCents,
+        checkoutMode: "cashfree_payment_session",
+        currencyCode: existingOrder.currencyCode,
+        orderId: existingOrder.orderId,
+        paymentSessionId: existingOrder.paymentSessionId,
+        provider: "cashfree",
+      });
+    }
+
+    if (existingOrder?.status === "paid") {
+      throw new AppError({
+        code: "CONFLICT",
+        message: "This invoice already has a paid Cashfree order.",
+        statusCode: 409,
+      });
+    }
+  }
+
+  const studentsResult = await listStudentsByIds(supabase, [invoice.student_id]);
+
+  if (studentsResult.error) {
+    throw mapDatabaseError(studentsResult.error);
+  }
+
+  const student = studentsResult.data?.[0];
+  const returnUrl = buildAbsoluteUrl(`/billing/invoices/${invoice.id}`);
+  returnUrl.searchParams.set("payment_provider", "cashfree");
+  returnUrl.searchParams.set("invoice_id", invoice.id);
+
+  const orderId = existingOrderId
+    ? buildCashfreeOrderId(invoice.id, Date.now().toString(36))
+    : buildCashfreeOrderId(invoice.id);
+
+  const providerIdempotencyKey = existingOrderId ? randomUUID() : invoice.id;
+
+  let paymentSession: PaymentSession | undefined;
+
+  try {
+    paymentSession = await provider.createPaymentSession({
+      amountCents: invoice.balance_cents,
+      currencyCode: invoice.currency_code,
+      customer: {
+        email: student?.email,
+        id: invoice.student_id,
+        name: formatStudentName(student),
+        phone: student?.phone,
+      },
+      idempotencyKey: providerIdempotencyKey,
+      invoiceId: invoice.id,
+      notifyUrl: buildAbsoluteUrl("/api/webhooks/cashfree").toString(),
+      orderId,
+      requestId: input.requestId ?? randomUUID(),
+      returnUrl: returnUrl.toString(),
+    });
+  } catch (error) {
+    if (error instanceof AppError && error.code === "CONFLICT") {
+      const existingOrder = await provider.getOrder(
+        orderId,
+        input.requestId ?? randomUUID(),
+      );
+
+      if (existingOrder?.paymentSessionId) {
+        paymentSession = {
+          amountCents: existingOrder.amountCents,
+          checkoutMode: "cashfree_payment_session" as const,
+          currencyCode: existingOrder.currencyCode,
+          orderId: existingOrder.orderId,
+          paymentSessionId: existingOrder.paymentSessionId,
+          provider: "cashfree" as const,
+        };
+      }
+    }
+
+    if (!paymentSession) {
+      throw error;
+    }
+  }
+
+  const { error: updateError } = await supabase
+    .from("billing_invoices")
+    .update({
+      cashfree_order_id: paymentSession.orderId,
+      cashfree_payment_session_id: paymentSession.paymentSessionId,
+      updated_by: context.identity.userId,
+    })
+    .eq("id", invoice.id)
+    .eq("organization_id", invoice.organization_id)
+    .eq("hostel_branch_id", invoice.hostel_branch_id)
+    .is("deleted_at", null);
+
+  if (updateError) {
+    throw mapDatabaseError(updateError);
+  }
+
+  await recordAuditEvent({
+    action: "billing.payment_session.create",
+    actorUserId: context.identity.userId,
+    durable: true,
+    entityId: invoice.id,
+    entityTable: "billing_invoices",
+    hostelBranchId: invoice.hostel_branch_id,
+    metadata: {
+      amount_cents: paymentSession.amountCents,
+      cashfree_order_id: paymentSession.orderId,
+      has_cashfree_session: true,
+      invoice_number: invoice.invoice_number,
+      provider: "cashfree",
+    },
+    organizationId: invoice.organization_id,
+    requestId: input.requestId,
+  });
+
+  return paymentSessionResultSchema.parse(paymentSession);
+}
+
+export async function processCashfreeWebhook(input: {
+  eventId: string;
+  eventTime?: string | undefined;
+  eventType: string;
+  payload: CashfreeWebhookPayload;
+  requestId: string;
+}) {
+  const paymentStatus = input.payload.data.payment.payment_status.toUpperCase();
+  const order = input.payload.data.order;
+  const payment = input.payload.data.payment;
+  const logMetadata = {
+    cashfree_order_id: order.order_id,
+    event_id: input.eventId,
+    event_type: input.eventType,
+    payment_status: paymentStatus,
+    provider: "cashfree",
+  };
+
+  if (paymentStatus !== "SUCCESS") {
+    await recordAuditEvent({
+      action: "billing.cashfree_webhook.ignored",
+      durable: true,
+      entityTable: "billing_invoices",
+      metadata: logMetadata,
+      requestId: input.requestId,
+    });
+
+    return {
+      processed: false,
+      reason: `ignored_${paymentStatus.toLowerCase()}`,
+    };
+  }
+
+  const supabase = createSupabaseAdminClient();
+  const { data: invoice, error: invoiceError } = await getInvoiceByCashfreeOrderId(
+    supabase,
+    order.order_id,
+  );
+
+  if (invoiceError) {
+    throw mapDatabaseError(invoiceError);
+  }
+
+  if (!invoice) {
+    throw new AppError({
+      code: "NOT_FOUND",
+      message: "Invoice for Cashfree order was not found.",
+      statusCode: 404,
+    });
+  }
+
+  const paymentAmountCents = cashfreeAmountToCents(payment.payment_amount);
+
+  if (payment.payment_currency !== invoice.currency_code) {
+    throw new AppError({
+      code: "BAD_REQUEST",
+      message: "Cashfree webhook currency does not match the invoice.",
+      statusCode: 400,
+    });
+  }
+
+  if (paymentAmountCents <= 0) {
+    throw new AppError({
+      code: "BAD_REQUEST",
+      message: "Cashfree webhook payment amount is invalid.",
+      statusCode: 400,
+    });
+  }
+
+  const { data, error } = await supabase.rpc("record_invoice_payment", {
+    p_actor_user_id: null as unknown as string,
+    p_amount_cents: paymentAmountCents,
+    p_idempotency_key: input.eventId,
+    p_invoice_id: invoice.id,
+    p_metadata: {
+      ...logMetadata,
+      bank_reference: payment.bank_reference ?? null,
+      cashfree_payment_time: payment.payment_time ?? null,
+    },
+    p_payment_method: "cashfree",
+    p_provider: "cashfree",
+    p_provider_event_id: input.eventId,
+    p_provider_reference: payment.cf_payment_id,
+    p_received_at: payment.payment_time ?? input.eventTime ?? new Date().toISOString(),
+    p_request_id: input.requestId,
+  });
+
+  if (error) {
+    throw mapDatabaseError(error);
+  }
+
+  const result = parseRpcResult(
+    paymentRecordResultSchema,
+    data,
+    "Cashfree payment recording returned an invalid response.",
+  );
+
+  return {
+    idempotent: result.idempotent ?? false,
+    paymentId: result.paymentId,
+    processed: true,
+    receiptId: result.receiptId,
+    receiptNumber: result.receiptNumber,
+  };
 }
 
 export async function addInvoiceAdjustment(input: AddInvoiceAdjustmentInput) {

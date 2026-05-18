@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import { redirect } from "next/navigation";
 
 import { getOptionalIdentity } from "@/lib/auth/session";
@@ -6,15 +7,21 @@ import { signInWithPasswordAction } from "@/modules/auth/actions";
 type LoginPageProps = {
   searchParams: Promise<{
     error?: string;
+    next?: string;
   }>;
 };
+
+function getSafeNextPath(value: string | undefined) {
+  return value?.startsWith("/") && !value.startsWith("//") ? value : undefined;
+}
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const identity = await getOptionalIdentity();
   const params = await searchParams;
+  const nextPath = getSafeNextPath(params.next);
 
   if (identity) {
-    redirect("/dashboard");
+    redirect((nextPath ?? "/dashboard") as Route);
   }
 
   return (
@@ -32,6 +39,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Invalid email or password.
           </p>
         ) : null}
+        {nextPath ? <input name="redirectTo" type="hidden" value={nextPath} /> : null}
         <label className="block space-y-1">
           <span className="text-sm font-medium">Email</span>
           <input

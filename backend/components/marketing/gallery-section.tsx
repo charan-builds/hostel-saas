@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
+
 import { publicContent } from "@/config/public-content";
 
 export function GallerySection() {
@@ -38,9 +40,12 @@ export function GallerySection() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group relative overflow-hidden rounded-2xl break-inside-avoid"
             >
-              <img
+              <Image
                 src={image}
                 alt={`Gallery image ${index + 1}`}
+                width={800}
+                height={600}
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                 className="w-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />

@@ -1,4 +1,4 @@
-export const AUTH_ROUTES = ["/login"] as const;
+export const AUTH_ROUTES = ["/login", "/student-login"] as const;
 
 export const PROTECTED_ROUTE_PREFIXES = [
   "/dashboard",
@@ -14,6 +14,7 @@ export const PROTECTED_ROUTE_PREFIXES = [
   "/leave",
   "/attendance",
   "/gate-passes",
+  "/student-portal",
   "/api/v1",
 ] as const;
 

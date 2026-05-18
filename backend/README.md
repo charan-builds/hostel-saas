@@ -38,6 +38,23 @@ also require `JOB_RUNNER_SECRET` before they will execute.
 
 See `../docs/supabase-real-project-setup.md` for the full hosted-project workflow.
 
+## Cashfree Payments
+
+Online rent collection uses Cashfree from server-only route handlers. Add these
+values to `.env.local` when enabling online checkout:
+
+```bash
+CASHFREE_ENV=sandbox
+CASHFREE_APP_ID=your_cashfree_app_id
+CASHFREE_SECRET_KEY=your_cashfree_secret_key
+CASHFREE_WEBHOOK_SECRET=your_cashfree_webhook_secret_or_secret_key
+```
+
+Use `POST /api/v1/billing/invoices/[invoiceId]/payment-session` to create the
+checkout session. Configure Cashfree to send payment webhooks to
+`/api/webhooks/cashfree`; browser redirects are informational and do not finalize
+payments.
+
 ## Real Integration Tests
 
 The default integration command verifies the test contracts while keeping live

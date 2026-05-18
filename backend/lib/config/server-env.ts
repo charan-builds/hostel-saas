@@ -6,6 +6,11 @@ import { publicEnvSchema } from "@/lib/config/public-env";
 
 const serverEnvSchema = publicEnvSchema.extend({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  CASHFREE_APP_ID: z.string().min(1).optional(),
+  CASHFREE_ENV: z.enum(["sandbox", "production"]).default("sandbox"),
+  CASHFREE_SECRET_KEY: z.string().min(1).optional(),
+  CASHFREE_WEBHOOK_SECRET: z.string().min(1).optional(),
+  AUTH_DEFAULT_PHONE_COUNTRY_CODE: z.string().min(2).max(8).default("+91"),
   DATABASE_URL: z.string().url().optional(),
   JOB_RUNNER_SECRET: z.string().min(24).optional(),
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
@@ -17,6 +22,11 @@ const serverEnvSchema = publicEnvSchema.extend({
 
 const parsedServerEnv = serverEnvSchema.safeParse({
   NODE_ENV: process.env.NODE_ENV,
+  CASHFREE_APP_ID: process.env.CASHFREE_APP_ID,
+  CASHFREE_ENV: process.env.CASHFREE_ENV,
+  CASHFREE_SECRET_KEY: process.env.CASHFREE_SECRET_KEY,
+  CASHFREE_WEBHOOK_SECRET: process.env.CASHFREE_WEBHOOK_SECRET,
+  AUTH_DEFAULT_PHONE_COUNTRY_CODE: process.env.AUTH_DEFAULT_PHONE_COUNTRY_CODE,
   DATABASE_URL: process.env.DATABASE_URL,
   JOB_RUNNER_SECRET: process.env.JOB_RUNNER_SECRET,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

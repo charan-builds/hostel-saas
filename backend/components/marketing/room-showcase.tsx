@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+
 import { publicContent } from "@/config/public-content";
 
 export function RoomShowcase() {
@@ -59,10 +61,12 @@ export function RoomShowcase() {
               className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
             >
               <div className="relative aspect-[4/3] overflow-hidden">
-                <img
+                <Image
                   src={room.image}
                   alt={room.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 {room.popular && (
                   <div className="absolute top-4 right-4 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white shadow-sm">

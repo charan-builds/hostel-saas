@@ -117,6 +117,18 @@ export const recordInvoicePaymentSchema = z.object({
   ),
 });
 
+export const createPaymentSessionSchema = z.object({
+  idempotencyKey: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().min(8).max(160).optional(),
+  ),
+  invoiceId: z.string().uuid(),
+  requestId: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().min(8).max(160).optional(),
+  ),
+});
+
 export const addInvoiceAdjustmentSchema = z.object({
   amountCents: z.coerce.number().int().min(1).max(100_000_000),
   description: z.string().trim().min(1).max(255),
@@ -136,6 +148,9 @@ export type GenerateMonthlyInvoicesInput = z.output<
 >;
 export type RecordInvoicePaymentInput = z.output<
   typeof recordInvoicePaymentSchema
+>;
+export type CreatePaymentSessionInput = z.output<
+  typeof createPaymentSessionSchema
 >;
 export type AddInvoiceAdjustmentInput = z.output<
   typeof addInvoiceAdjustmentSchema

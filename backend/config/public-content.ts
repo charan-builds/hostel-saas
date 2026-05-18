@@ -4,8 +4,22 @@ export const publicContent = {
     heading: "Experience true hospitality.",
     description: "Discover a sanctuary designed for comfort and connection. Your home away from home.",
     image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2000&auto=format&fit=crop",
-    primaryCTA: { text: "Book a Room", href: "/book" },
-    secondaryCTA: { text: "View Gallery", href: "/gallery" },
+    primaryCTA: { text: "Book a Visit", href: "/book" },
+    secondaryCTA: { text: "WhatsApp Us", href: "/contact" },
+    stats: [
+      { label: "Happy Residents", value: "2000+" },
+      { label: "Locations", value: "3" },
+    ],
+    trustBadges: [
+      "CCTV Protected",
+      "High Speed WiFi",
+      "Hygienic Food",
+      "Near Colleges",
+      "24/7 Support",
+    ],
+    occupancy: "99%",
+    rating: "4.9",
+    startingPrice: "$500/mo",
   },
   facilities: [
     {
@@ -24,7 +38,7 @@ export const publicContent = {
       icon: "utensils",
     },
   ],
-  roomPricing: [
+  roomTypes: [
     {
       id: "private-suite",
       title: "Private Suite",

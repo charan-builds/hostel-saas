@@ -5,6 +5,14 @@ import type { NextConfig } from "next";
 import { getSecurityHeaders } from "./lib/security/security-headers";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        hostname: "images.unsplash.com",
+        protocol: "https",
+      },
+    ],
+  },
   poweredByHeader: false,
   reactStrictMode: true,
   typedRoutes: true,

@@ -42,10 +42,16 @@ SUPABASE_ACCESS_TOKEN=sbp_your_personal_access_token
 SUPABASE_DB_PASSWORD=your_database_password
 DATABASE_URL=postgresql://postgres:password@db.your-project-ref.supabase.co:5432/postgres
 SUPABASE_PRODUCTION_PROJECT_REF=your-production-project-ref
+CASHFREE_ENV=sandbox
+CASHFREE_APP_ID=your_cashfree_app_id
+CASHFREE_SECRET_KEY=your_cashfree_secret_key
+CASHFREE_WEBHOOK_SECRET=your_cashfree_webhook_secret_or_secret_key
 # SUPABASE_CONFIRM_NON_PRODUCTION=1 # local-only bypass before production exists
 ```
 
 Keep server secrets unprefixed. Anything prefixed with `NEXT_PUBLIC_` is browser-visible in Next.js.
+Cashfree secrets are server-only and are only used by route handlers and webhook
+verification code.
 
 ## CLI Workflow
 

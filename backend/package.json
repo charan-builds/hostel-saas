@@ -27,6 +27,7 @@
     "db:test:seed": "RUN_SUPABASE_INTEGRATION_TESTS=1 node scripts/integration-test-db.mjs seed",
     "setup:supabase": "pnpm verify:supabase && pnpm migrations:check && pnpm supabase:link && pnpm db:push:dry-run && pnpm types:db",
     "test:integration": "node scripts/run-integration-tests.mjs --contracts",
+    "test:integration:contracts": "node scripts/run-integration-tests.mjs --contracts",
     "test:integration:supabase": "node scripts/run-integration-tests.mjs --supabase",
     "test:integration:local": "node scripts/run-integration-tests.mjs --local",
     "typecheck": "next typegen && tsc --noEmit"

@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 
 import { recordAuditEvent } from "@/lib/audit/log";
 import { requirePermission } from "@/lib/auth/guards";
+import { normalizePhoneForAuth } from "@/lib/auth/phone-normalization";
 import { buildOrIlikeFilter } from "@/lib/db/postgrest-filters";
 import { AppError } from "@/lib/http/errors";
 import { logger } from "@/lib/logger";
@@ -117,6 +118,27 @@ function toSerializableJson(value: unknown): Json {
       serialization_error: "Upload verification details were not JSON-safe.",
     };
   }
+}
+
+function normalizeOptionalStudentPhone(phone: string | undefined) {
+  return phone ? normalizePhoneForAuth(phone).e164 : undefined;
+}
+
+function withStudentAuthMetadata(metadata: Json, phone: string | undefined): Json {
+  const current = toJsonObject(metadata);
+  const normalizedPhone = normalizeOptionalStudentPhone(phone);
+
+  if (!normalizedPhone) {
+    const rest = { ...current };
+    delete rest.auth_phone_e164;
+
+    return rest;
+  }
+
+  return {
+    ...current,
+    auth_phone_e164: normalizedPhone,
+  };
 }
 
 export async function listStudents(input: ListStudentsQuery) {
@@ -258,6 +280,7 @@ export async function createStudent(input: CreateStudentInput) {
     input.organizationId ?? context.organizationId,
   );
   const supabase = await createSupabaseServerClient();
+  const normalizedPhone = normalizeOptionalStudentPhone(input.phone);
   const { data, error } = await supabase.rpc("create_student_with_assignment", {
     p_actor_user_id: context.identity.userId,
     p_admission_date: input.admissionDate,
@@ -266,7 +289,7 @@ export async function createStudent(input: CreateStudentInput) {
     p_guardian_info: toGuardianInfo(input),
     p_hostel_branch_id: input.hostelBranchId,
     p_last_name: input.lastName,
-    p_metadata: {},
+    p_metadata: withStudentAuthMetadata({}, input.phone),
     p_organization_id: organizationId,
     ...(input.bedId === undefined ? {} : { p_bed_id: input.bedId }),
     ...(input.dateOfBirth === undefined
@@ -274,7 +297,7 @@ export async function createStudent(input: CreateStudentInput) {
       : { p_date_of_birth: input.dateOfBirth }),
     ...(input.email === undefined ? {} : { p_email: input.email }),
     ...(input.gender === undefined ? {} : { p_gender: input.gender }),
-    ...(input.phone === undefined ? {} : { p_phone: input.phone }),
+    ...(normalizedPhone === undefined ? {} : { p_phone: normalizedPhone }),
     ...(input.roomId === undefined ? {} : { p_room_id: input.roomId }),
   });
 
@@ -307,6 +330,7 @@ export async function updateStudent(input: UpdateStudentInput) {
   });
 
   const supabase = await createSupabaseServerClient();
+  const normalizedPhone = normalizeOptionalStudentPhone(input.phone);
   const { data, error } = await supabase
     .from("students")
     .update({
@@ -318,7 +342,8 @@ export async function updateStudent(input: UpdateStudentInput) {
       gender: input.gender ?? null,
       guardian_info: toGuardianInfo(input),
       last_name: input.lastName,
-      phone: input.phone ?? null,
+      metadata: withStudentAuthMetadata(existing.metadata, input.phone),
+      phone: normalizedPhone ?? null,
       status: input.status,
       updated_by: context.identity.userId,
     })

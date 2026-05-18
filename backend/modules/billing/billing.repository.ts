@@ -1,10 +1,12 @@
 import "server-only";
 
-import { buildOrIlikeFilter } from "@/lib/db/postgrest-filters";
-import type { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { ListInvoicesQuery } from "@/modules/billing/schemas";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+import { buildOrIlikeFilter } from "@/lib/db/postgrest-filters";
+import type { ListInvoicesQuery } from "@/modules/billing/schemas";
+import type { Database } from "@/types/database.types";
+
+type SupabaseServerClient = SupabaseClient<Database>;
 
 type ListInvoiceRowsOptions = {
   input: ListInvoicesQuery;
@@ -118,6 +120,18 @@ export async function getInvoiceById(
     .maybeSingle();
 }
 
+export async function getInvoiceByCashfreeOrderId(
+  supabase: SupabaseServerClient,
+  orderId: string,
+) {
+  return supabase
+    .from("billing_invoices")
+    .select("*")
+    .eq("cashfree_order_id", orderId)
+    .is("deleted_at", null)
+    .maybeSingle();
+}
+
 export async function listInvoiceItems(
   supabase: SupabaseServerClient,
   invoiceId: string,
@@ -181,7 +195,9 @@ export async function listStudentsByIds(
 
   return supabase
     .from("students")
-    .select("id,student_code,first_name,last_name,status,hostel_branch_id,organization_id")
+    .select(
+      "id,student_code,first_name,last_name,email,phone,status,hostel_branch_id,organization_id",
+    )
     .in("id", studentIds)
     .is("deleted_at", null);
 }
@@ -193,7 +209,9 @@ export async function listBillingFormOptions(
 ) {
   let studentsQuery = supabase
     .from("students")
-    .select("id,student_code,first_name,last_name,status,hostel_branch_id,organization_id")
+    .select(
+      "id,student_code,first_name,last_name,email,phone,status,hostel_branch_id,organization_id",
+    )
     .eq("organization_id", organizationId)
     .eq("status", "active")
     .is("deleted_at", null)
