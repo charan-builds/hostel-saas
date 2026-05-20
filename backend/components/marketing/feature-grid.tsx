@@ -45,7 +45,7 @@ export function FeatureGrid() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-xl text-slate-600 leading-relaxed"
           >
-            We don't just provide a room. We provide a complete ecosystem for your success, comfort, and peace of mind.
+            We don&apos;t just provide a room. We provide a complete ecosystem for your success, comfort, and peace of mind.
           </motion.p>
         </div>
 

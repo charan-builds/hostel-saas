@@ -12,7 +12,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/state";
@@ -20,11 +20,13 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 type DataTableProps<TData, TValue> = {
+  bulkActions?: ReactNode;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   emptyDescription?: string;
   emptyTitle?: string;
   filterPlaceholder?: string;
+  mobileCard?: (row: TData, index: number) => ReactNode;
   pageSize?: number;
   rowSelection?: boolean;
   searchKey?: string;
@@ -57,11 +59,13 @@ export function createSelectionColumn<TData>(): ColumnDef<TData> {
 }
 
 export function DataTable<TData, TValue>({
+  bulkActions,
   columns,
   data,
   emptyDescription = "Try adjusting filters or adding a new record.",
   emptyTitle = "No records found",
   filterPlaceholder = "Search records",
+  mobileCard,
   pageSize = 10,
   rowSelection: enableRowSelection = true,
   searchKey,
@@ -116,15 +120,31 @@ export function DataTable<TData, TValue>({
             value={globalFilter}
           />
         </label>
-        <p className="text-sm text-muted-foreground">
-          {selectedCount > 0 ? `${selectedCount} selected · ` : ""}
-          {rowCount} rows
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          {selectedCount > 0 && bulkActions ? bulkActions : null}
+          <p className="text-sm text-muted-foreground">
+            {selectedCount > 0 ? `${selectedCount} selected · ` : ""}
+            {rowCount} rows
+          </p>
+        </div>
       </div>
       <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <div className="overflow-x-auto">
+        {mobileCard ? (
+          <div className="divide-y divide-border md:hidden">
+            {table.getRowModel().rows.length > 0 ? (
+              table.getRowModel().rows.map((row, index) => (
+                <div className="p-3" key={row.id}>
+                  {mobileCard(row.original, index)}
+                </div>
+              ))
+            ) : (
+              <EmptyState description={emptyDescription} title={emptyTitle} />
+            )}
+          </div>
+        ) : null}
+        <div className={mobileCard ? "hidden overflow-x-auto md:block" : "overflow-x-auto"}>
           <table className="w-full min-w-[720px] border-collapse text-left text-sm">
-            <thead className="bg-muted/70 text-muted-foreground">
+            <thead className="sticky top-0 z-10 bg-muted/85 text-muted-foreground backdrop-blur">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (

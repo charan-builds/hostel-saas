@@ -38,7 +38,7 @@ export function StatCard({
     <Card
       className={cn(
         "h-full transition-colors",
-        href ? "hover:border-primary/40 hover:bg-accent/40" : undefined,
+        href ? "hover:border-primary/35 hover:bg-muted/60" : undefined,
       )}
     >
       <CardContent className="flex h-full flex-col gap-4 p-4">
@@ -73,7 +73,11 @@ export function StatCard({
   }
 
   return (
-    <Link className="block h-full focus-visible:outline-2 focus-visible:outline-offset-2" href={href}>
+    <Link
+      aria-label={`${label}: ${value}`}
+      className="block h-full rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2"
+      href={href}
+    >
       {content}
     </Link>
   );

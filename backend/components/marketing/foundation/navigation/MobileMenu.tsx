@@ -19,7 +19,7 @@ export function MobileMenu({ isOpen, onClose, isLoggedIn }: MobileMenuProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 top-[60px] z-40 bg-background/80 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 top-[70px] z-40 bg-slate-950/80 backdrop-blur-md md:hidden"
             onClick={onClose}
           />
           <motion.div
@@ -27,7 +27,7 @@ export function MobileMenu({ isOpen, onClose, isLoggedIn }: MobileMenuProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 right-0 top-[60px] z-50 w-[80%] max-w-sm border-l border-border bg-card shadow-2xl md:hidden"
+            className="fixed bottom-0 right-0 top-[70px] z-50 w-[80%] max-w-sm border-l border-white/10 bg-slate-900 shadow-2xl md:hidden"
           >
             <div className="flex h-full flex-col overflow-y-auto px-6 py-8">
               <nav className="flex flex-col gap-2">

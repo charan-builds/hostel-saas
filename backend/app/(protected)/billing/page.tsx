@@ -2,6 +2,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { CalendarClock, Plus, ReceiptText } from "lucide-react";
 
+import { ErpPage, ErpPageGrid } from "@/components/layout/erp-page";
 import { InvoiceTable } from "@/components/billing/invoice-table";
 import { RevenueCards } from "@/components/billing/revenue-cards";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ type BillingPageProps = {
 };
 
 const selectClassName =
-  "h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  "erp-control disabled:cursor-not-allowed disabled:opacity-50";
 
 function currentInvoiceMonth() {
   return `${new Date().toISOString().slice(0, 7)}-01`;
@@ -94,7 +95,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
   ];
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <Button asChild>
@@ -111,7 +112,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
 
       <RevenueCards summary={invoices.summary} />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <ErpPageGrid>
         <StatCard
           description={`${invoices.summary.pendingCount + invoices.summary.overdueCount} invoices need follow-up`}
           icon={ReceiptText}
@@ -138,7 +139,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
           label="Invoice month"
           value={currentInvoiceMonth().slice(0, 7)}
         />
-      </div>
+      </ErpPageGrid>
 
       <div className="flex flex-wrap gap-2">
         {quickFilters.map((filter) => (
@@ -279,6 +280,6 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
           )}
         </nav>
       </div>
-    </section>
+    </ErpPage>
   );
 }

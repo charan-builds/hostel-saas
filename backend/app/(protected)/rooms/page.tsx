@@ -2,6 +2,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { Plus, Settings } from "lucide-react";
 
+import { ErpPage } from "@/components/layout/erp-page";
 import { OccupancyCards } from "@/components/rooms/occupancy-cards";
 import { RoomTable } from "@/components/rooms/room-table";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ type RoomsPageProps = {
 };
 
 const selectClassName =
-  "h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2";
+  "erp-control";
 
 function roomsPageHref(
   query: {
@@ -63,7 +64,7 @@ export default async function RoomsPage({ searchParams }: RoomsPageProps) {
   const rooms = await listRooms(query);
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <>
@@ -125,6 +126,6 @@ export default async function RoomsPage({ searchParams }: RoomsPageProps) {
         page={rooms.page}
         pageCount={rooms.pageCount}
       />
-    </section>
+    </ErpPage>
   );
 }

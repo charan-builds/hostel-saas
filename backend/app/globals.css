@@ -25,6 +25,10 @@
   --success: #22c55e;
   --warning: #f59e0b;
   --info: #3b82f6;
+  --erp-surface: #ffffff;
+  --erp-surface-muted: #f8fafc;
+  --erp-shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.06);
+  --erp-shadow-popover: 0 18px 50px -24px rgb(15 23 42 / 0.42);
   --radius: 0.5rem;
 }
 
@@ -51,10 +55,14 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-info: var(--info);
+  --color-erp-surface: var(--erp-surface);
+  --color-erp-surface-muted: var(--erp-surface-muted);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --font-heading: var(--font-heading), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
@@ -82,6 +90,10 @@
   --success: #22c55e;
   --warning: #f59e0b;
   --info: #3b82f6;
+  --erp-surface: #0f172a;
+  --erp-surface-muted: #111827;
+  --erp-shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.35);
+  --erp-shadow-popover: 0 18px 50px -24px rgb(0 0 0 / 0.75);
 }
 
 * {
@@ -152,5 +164,45 @@ textarea {
   .dark select.bg-white,
   .dark textarea.bg-white {
     background-color: var(--background);
+  }
+
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 dark:bg-slate-900/70 dark:border-white/10;
+  }
+
+  .glass-hover {
+    @apply hover:bg-white/90 hover:shadow-lg transition-all duration-300 dark:hover:bg-slate-800/90;
+  }
+
+  .cinematic-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  }
+}
+
+@layer components {
+  .erp-panel {
+    @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm;
+  }
+
+  .erp-control {
+    @apply h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .erp-table-shell {
+    @apply overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm;
+  }
+
+  .erp-page-stack {
+    @apply space-y-6 pb-10;
+  }
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
   }
 }

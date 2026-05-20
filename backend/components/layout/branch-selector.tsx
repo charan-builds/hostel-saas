@@ -44,7 +44,7 @@ export function BranchSelector({
       />
       <select
         aria-label="Filter active branch"
-        className="h-10 max-w-[13rem] appearance-none rounded-md border border-border bg-background py-2 pl-9 pr-8 text-sm shadow-sm"
+        className="h-10 max-w-[13rem] appearance-none rounded-md border border-border bg-background py-2 pl-9 pr-8 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
         value={value}
         onChange={(event) => {
           const params = new URLSearchParams(searchParams.toString());

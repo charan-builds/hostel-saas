@@ -24,11 +24,12 @@ export function SearchFilterBar({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-lg border border-border bg-card p-3 text-card-foreground shadow-sm sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-3 rounded-lg border border-border bg-card p-3 text-card-foreground shadow-[var(--erp-shadow-card)] sm:flex-row sm:items-center sm:justify-between",
         className,
       )}
+      role="search"
     >
-      <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center [&_select]:w-full sm:[&_select]:w-auto">
         <div className="relative min-w-0 flex-1">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"

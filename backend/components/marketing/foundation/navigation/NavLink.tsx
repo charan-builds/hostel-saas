@@ -33,7 +33,7 @@ export function NavLink({ href, title, onClick, isMobile = false }: NavLinkProps
   return (
     <Link
       href={href}
-      className="group relative px-1 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+      className="group relative px-1 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white"
     >
       {title}
       {isActive && (
@@ -44,7 +44,7 @@ export function NavLink({ href, title, onClick, isMobile = false }: NavLinkProps
           transition={{ type: "spring", stiffness: 380, damping: 30 }}
         />
       )}
-      <div className="absolute -bottom-1 left-0 right-0 h-[2px] origin-left scale-x-0 bg-primary/30 transition-transform duration-300 ease-out group-hover:scale-x-100" />
+      <div className="absolute -bottom-1 left-0 right-0 h-[2px] origin-left scale-x-0 bg-primary/50 transition-transform duration-300 ease-out group-hover:scale-x-100" />
     </Link>
   );
 }

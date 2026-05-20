@@ -20,6 +20,7 @@ import {
 
 import { ActivityFeed } from "@/components/analytics/activity-feed";
 import { SimpleBarChart } from "@/components/charts/simple-bar-chart";
+import { ErpPage, ErpPageGrid } from "@/components/layout/erp-page";
 import { TenantHeader } from "@/components/layout/tenant-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/state";
+import { QuickActionButton } from "@/components/ui/quick-action-button";
 import { StatCard } from "@/components/ui/stat-card";
 import type { getAnalyticsDashboard } from "@/modules/analytics/analytics.service";
 import { formatCurrency } from "@/lib/utils";
@@ -138,7 +140,7 @@ export function DashboardHome({
   ) satisfies Array<{ href: Route; icon: LucideIcon; label: string }>;
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <>
@@ -171,7 +173,7 @@ export function DashboardHome({
         title="Operations dashboard"
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <ErpPageGrid>
         <StatCard
           description="Active students in the selected scope"
           href="/students"
@@ -203,9 +205,9 @@ export function DashboardHome({
           tone={overdueInvoices > 0 ? "warning" : "default"}
           value={formatCurrency(analytics?.billing.pendingDueCents ?? 0, currencyCode)}
         />
-      </div>
+      </ErpPageGrid>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <ErpPageGrid>
         <StatCard
           description="Occupied beds from live assignments"
           href="/rooms"
@@ -235,7 +237,7 @@ export function DashboardHome({
           label="Recent payments"
           value={formatCurrency(analytics?.billing.collectedCents ?? 0, currencyCode)}
         />
-      </div>
+      </ErpPageGrid>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
         <Card>
@@ -247,17 +249,13 @@ export function DashboardHome({
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {quickActions.map((action) => (
-              <Button
-                asChild
-                className="h-12 justify-start"
+              <QuickActionButton
+                href={action.href}
+                icon={action.icon}
                 key={action.href}
-                variant="outline"
-              >
-                <Link href={action.href}>
-                  <action.icon aria-hidden="true" />
-                  {action.label}
-                </Link>
-              </Button>
+                label={action.label}
+                tone={action.href === "/billing" ? "warning" : "default"}
+              />
             ))}
           </CardContent>
         </Card>
@@ -358,6 +356,6 @@ export function DashboardHome({
           value={String(unreadNotifications)}
         />
       </div>
-    </section>
+    </ErpPage>
   );
 }

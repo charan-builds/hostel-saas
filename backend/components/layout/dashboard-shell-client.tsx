@@ -134,10 +134,10 @@ function SidebarNav({
                   aria-current={active ? "page" : undefined}
                   aria-label={collapsed ? item.label : undefined}
                   className={cn(
-                    "flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
+                    "relative flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2",
                     collapsed ? "justify-center px-0" : undefined,
                     active
-                      ? "bg-accent text-accent-foreground"
+                      ? "bg-primary/10 text-foreground before:absolute before:left-0 before:h-5 before:w-1 before:rounded-r-full before:bg-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                   href={item.href}
@@ -184,7 +184,7 @@ function TenantSwitcher({
       />
       <select
         aria-label="Switch tenant"
-        className="h-10 max-w-[13rem] appearance-none rounded-md border border-border bg-background py-2 pl-9 pr-8 text-sm shadow-sm"
+        className="h-10 max-w-[13rem] appearance-none rounded-md border border-border bg-background py-2 pl-9 pr-8 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
         defaultValue={tenant.organizationId ?? tenantOptions[0]?.organizationId}
         name="organizationId"
         onChange={(event) => event.currentTarget.form?.requestSubmit()}
@@ -229,7 +229,7 @@ function NotificationDropdown({
         ) : null}
       </Button>
       {open ? (
-        <div className="absolute right-0 z-40 mt-2 w-80 rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg">
+        <div className="absolute right-0 z-40 mt-2 w-80 rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-[var(--erp-shadow-popover)]">
           <div className="flex items-center justify-between gap-3">
             <p className="font-semibold">Notifications</p>
             <Badge variant={unreadCount > 0 ? "warning" : "muted"}>
@@ -284,7 +284,7 @@ function UserMenu({ tenant }: { tenant: ShellTenant }) {
         <span className="hidden max-w-28 truncate lg:inline">{tenant.fullName}</span>
       </Button>
       {open ? (
-        <div className="absolute right-0 z-40 mt-2 w-72 rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg">
+        <div className="absolute right-0 z-40 mt-2 w-72 rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-[var(--erp-shadow-popover)]">
           <div className="flex items-center gap-3">
             <span className="grid size-10 place-items-center rounded-full bg-accent font-semibold text-accent-foreground">
               {tenant.fullName.slice(0, 1).toUpperCase()}
@@ -354,7 +354,7 @@ export function DashboardShellClient({
     <div className="min-h-screen bg-background text-foreground">
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-30 hidden border-r border-border bg-card transition-[width] lg:block",
+          "fixed inset-y-0 left-0 z-30 hidden border-r border-border bg-card/95 shadow-[var(--erp-shadow-card)] backdrop-blur transition-[width] lg:block",
           sidebarCollapsed ? "w-20" : "w-72",
         )}
       >
@@ -400,6 +400,7 @@ export function DashboardShellClient({
         </div>
       </aside>
       <Sheet
+        description="Switch tenant, filter branches, and move through ERP workflows."
         onOpenChange={setMobileOpen}
         open={mobileOpen}
         side="left"
@@ -425,7 +426,7 @@ export function DashboardShellClient({
           sidebarCollapsed ? "lg:pl-20" : "lg:pl-72",
         )}
       >
-        <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <Button
@@ -469,7 +470,7 @@ export function DashboardShellClient({
             </div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
+        <main className="mx-auto w-full max-w-[1600px] px-4 pb-20 pt-5 sm:px-6 sm:pt-6 lg:px-8">
           {children}
         </main>
       </div>

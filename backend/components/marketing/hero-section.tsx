@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Phone, MessageCircle, MapPin, Droplet, Users, Shield, Briefcase } from "lucide-react";
 import { websiteConfig } from "@/config/website-config";
-import { PremiumButton } from "./foundation/PremiumButton";
+import { publicContent } from "@/config/public-content";
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -12,6 +12,8 @@ export function HeroSection() {
     target: containerRef,
     offset: ["start start", "end start"],
   });
+
+  const { hero } = publicContent;
 
   const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const opacityText = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
@@ -29,7 +31,7 @@ export function HeroSection() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
-          src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2500&auto=format&fit=crop"
+          src={hero.image}
           alt="Hostel Background"
           className="w-full h-full object-cover"
         />
@@ -54,7 +56,7 @@ export function HeroSection() {
           className="mb-8 inline-flex items-center rounded-full border border-white/10 bg-black/30 px-5 py-2 text-sm font-medium tracking-[0.2em] text-white/90 backdrop-blur-md uppercase"
         >
           <span className="w-2 h-2 rounded-full bg-primary mr-3 animate-pulse shadow-[0_0_10px_rgba(14,165,233,0.8)]" />
-          BOYS HOSTEL — PULIVENDULA
+          {hero.badge}
         </motion.div>
 
         <motion.h1 
@@ -63,7 +65,7 @@ export function HeroSection() {
           transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="mb-6 text-5xl sm:text-7xl md:text-8xl font-heading font-extrabold text-white tracking-tight drop-shadow-2xl"
         >
-          {websiteConfig.name}
+          {hero.heading}
         </motion.h1>
 
         <motion.p 
@@ -72,39 +74,41 @@ export function HeroSection() {
           transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="mb-8 text-2xl sm:text-3xl font-medium text-white/90 drop-shadow-lg"
         >
-          Safe, Neat & Affordable Accommodation
+          {websiteConfig.tagline}
         </motion.p>
         
         <motion.p 
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-12 text-lg sm:text-xl text-white/70 max-w-2xl mx-auto font-light leading-relaxed"
+          className="mb-12 text-lg sm:text-xl text-white/70 max-w-3xl mx-auto font-light leading-relaxed"
         >
-          Modern accommodation for students and working professionals near Loyola Polytechnic College.
+          {hero.description}
         </motion.p>
 
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full max-w-2xl mx-auto"
+          className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full max-w-3xl mx-auto"
         >
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <PremiumButton href={"tel:+910000000000" as any} variant="primary" className="w-full sm:w-auto px-10 py-4 text-lg font-medium shadow-[0_0_30px_rgba(14,165,233,0.3)]">
+          <a 
+            href={hero.primaryCTA.href}
+            className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-4 text-lg font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(14,165,233,0.3)]"
+          >
             <Phone size={20} className="mr-3" />
-            Call Now
-          </PremiumButton>
+            {hero.primaryCTA.text}
+          </a>
           
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <PremiumButton 
-            href={"/contact" as any} 
-            variant="secondary" 
-            className="w-full sm:w-auto px-10 py-4 text-lg font-medium bg-white/10 hover:bg-white/20 text-[#25D366] border border-white/10 backdrop-blur-md"
+          <a 
+            href={hero.secondaryCTA.href}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-4 text-lg font-medium bg-white/10 hover:bg-white/20 text-[#22C55E] border border-white/10 rounded-xl backdrop-blur-md transition-all"
           >
             <MessageCircle size={20} className="mr-3" />
-            WhatsApp
-          </PremiumButton>
+            {hero.secondaryCTA.text}
+          </a>
           
           <a 
             href={websiteConfig.contact.mapsLink}
@@ -127,9 +131,9 @@ export function HeroSection() {
       >
         <div className="mx-auto max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { value: "₹3,500", label: "Students", icon: Users },
-            { value: "₹5,000", label: "Employees", icon: Briefcase },
-            { value: "24/7", label: "Water Supply", icon: Droplet },
+            { value: hero.stats[0]?.value || "₹3,500", label: "Students", icon: Users },
+            { value: hero.stats[1]?.value || "₹5,000", label: "Employees", icon: Briefcase },
+            { value: hero.stats[2]?.value || "24/7", label: "Water Supply", icon: Droplet },
             { value: "CCTV", label: "Protected", icon: Shield },
           ].map((stat, i) => (
             <div 

@@ -24,27 +24,30 @@ export function NavbarActions({ isLoggedIn, isMobile = false, onMobileClick }: N
 
   return (
     <div className={containerClass}>
+      <button 
+        className="flex items-center gap-2 text-sm font-medium text-white/80 hover:text-white transition-colors"
+        aria-label="Switch Language"
+      >
+        <span className="text-lg">EN</span>
+      </button>
+
       <a
         href={`https://wa.me/${websiteConfig.contact.whatsapp.replace(/[^0-9]/g, '')}`}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+        className="flex items-center gap-2 text-sm font-medium text-white/80 hover:text-[#22C55E] transition-colors"
       >
-        <MessageCircle size={18} className="text-primary" />
-        <span className={isMobile ? "text-lg" : ""}>WhatsApp Us</span>
+        <MessageCircle size={18} className="text-[#22C55E]" />
+        <span className={isMobile ? "text-lg text-foreground" : ""}>WhatsApp</span>
       </a>
       
       <Link
         href="/login"
-        className={`text-sm font-medium text-foreground hover:text-primary transition-colors ${isMobile ? "text-lg py-2" : ""}`}
+        className={`text-sm font-medium text-white/80 hover:text-white transition-colors ${isMobile ? "text-lg py-2 text-foreground" : ""}`}
         {...(onMobileClick ? { onClick: () => onMobileClick() } : {})}
       >
         Log in
       </Link>
-      
-      <PremiumButton href="/book" variant="primary" {...(onMobileClick ? { onClick: onMobileClick } : {})}>
-        Book Visit
-      </PremiumButton>
     </div>
   );
 }

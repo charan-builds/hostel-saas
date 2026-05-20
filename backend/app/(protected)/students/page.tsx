@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { UserPlus, Users, UserX, MapPinned } from "lucide-react";
 
+import { ErpPage, ErpPageGrid } from "@/components/layout/erp-page";
 import { StudentTable } from "@/components/students/student-table";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -12,6 +13,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { validateInput } from "@/lib/validation/zod";
 import { listStudentsQuerySchema } from "@/modules/students/schemas";
 import { listStudents } from "@/modules/students/students.service";
+
+const selectClassName = "erp-control";
 
 type StudentsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -87,7 +90,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
     : undefined;
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <Button asChild>
@@ -102,7 +105,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
         title="Students"
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <ErpPageGrid>
         <StatCard
           description="Matching the current filters"
           icon={Users}
@@ -130,7 +133,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
           label="Branch"
           value={selectedBranchName ?? "All branches"}
         />
-      </div>
+      </ErpPageGrid>
 
       <form action="/students">
         <SearchFilterBar
@@ -144,7 +147,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
         >
           <select
             aria-label="Filter students by branch"
-            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+            className={selectClassName}
             defaultValue={query.hostelBranchId ?? ""}
             name="hostelBranchId"
           >
@@ -157,7 +160,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
           </select>
           <select
             aria-label="Filter students by status"
-            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+            className={selectClassName}
             defaultValue={query.status ?? ""}
             name="status"
           >
@@ -167,7 +170,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
           </select>
           <select
             aria-label="Rows per page"
-            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+            className={selectClassName}
             defaultValue={String(query.limit)}
             name="limit"
           >
@@ -214,6 +217,6 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
           )}
         </nav>
       </div>
-    </section>
+    </ErpPage>
   );
 }

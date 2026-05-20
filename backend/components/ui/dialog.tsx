@@ -144,11 +144,13 @@ export function Dialog({
 }
 
 type SheetProps = DialogProps & {
+  className?: string;
   side?: "left" | "right";
 };
 
 export function Sheet({
   children,
+  className,
   description,
   onOpenChange,
   open,
@@ -175,6 +177,7 @@ export function Sheet({
         className={cn(
           "fixed top-0 h-full w-[min(88vw,22rem)] border-border bg-popover p-4 text-popover-foreground shadow-xl",
           side === "left" ? "left-0 border-r" : "right-0 border-l",
+          className,
         )}
         ref={containerRef}
       >

@@ -22,7 +22,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between",
+        "flex flex-col gap-4 border-b border-border/70 pb-5 lg:flex-row lg:items-end lg:justify-between",
         className,
       )}
     >
@@ -30,7 +30,7 @@ export function PageHeader({
         {eyebrow ? (
           <p className="text-sm font-medium text-muted-foreground">{eyebrow}</p>
         ) : null}
-        <h1 className="mt-1 text-2xl font-semibold tracking-normal sm:text-3xl">
+        <h1 className="mt-1 text-2xl font-semibold tracking-normal text-balance sm:text-3xl">
           {title}
         </h1>
         {description ? (
@@ -40,7 +40,11 @@ export function PageHeader({
         ) : null}
         {meta ? <div className="mt-3 flex flex-wrap gap-2">{meta}</div> : null}
       </div>
-      {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+          {actions}
+        </div>
+      ) : null}
     </div>
   );
 }

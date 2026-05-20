@@ -47,7 +47,7 @@ export function TestimonialSlider() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-xl text-slate-600 leading-relaxed"
           >
-            Don't just take our word for it. Here is what our community has to say about living here.
+            Don&apos;t just take our word for it. Here is what our community has to say about living here.
           </motion.p>
         </div>
 
@@ -71,7 +71,7 @@ export function TestimonialSlider() {
                   className="flex flex-col items-center text-center relative z-10"
                 >
                   <p className="text-2xl md:text-4xl font-heading font-medium text-slate-800 leading-tight md:leading-snug mb-12 max-w-3xl">
-                    "{testimonials[currentIndex]?.quote}"
+                    &quot;{testimonials[currentIndex]?.quote}&quot;
                   </p>
                   
                   <div className="flex flex-col items-center gap-4">

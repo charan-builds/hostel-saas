@@ -1,112 +1,112 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Phone, MessageCircle, MapPin, Shield, Sparkles, Map, Users, Heart, IndianRupee, Video, Wifi, Droplet, Coffee, ArrowRight } from "lucide-react";
 import { websiteConfig } from "@/config/website-config";
 import { publicContent } from "@/config/public-content";
 import { AnimatedReveal } from "@/components/marketing/foundation/AnimatedReveal";
-import { SectionContainer } from "@/components/marketing/foundation/SectionContainer";
-import { GlassCard } from "@/components/marketing/foundation/GlassCard";
-import { PremiumButton } from "@/components/marketing/foundation/PremiumButton";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { Route } from "next";
 
 export default function AboutPage() {
+  const { about } = publicContent;
+
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col min-h-screen bg-slate-950">
       
       {/* 1. HERO BANNER */}
       <section className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
-            src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2000&auto=format&fit=crop" 
+            src={publicContent.hero.image} 
             alt="Hostel Building" 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.45)" }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-slate-950" />
         </div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
           <AnimatedReveal delay={0.1}>
-            <div className="mb-6 inline-flex items-center rounded-full border border-white/20 bg-black/20 px-4 py-1.5 text-sm font-bold tracking-widest text-white backdrop-blur-md uppercase shadow-lg">
-              About Sadhana Boys Hostel
+            <div className="mb-6 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-bold tracking-[0.2em] text-white/90 backdrop-blur-md uppercase shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+              {about.badge}
             </div>
           </AnimatedReveal>
 
           <AnimatedReveal delay={0.2}>
-            <h1 className="mb-6 text-4xl sm:text-5xl md:text-6xl font-heading font-bold text-white tracking-tight drop-shadow-md max-w-4xl">
-              A Safe & Comfortable Place To Stay.
+            <h1 className="mb-6 text-4xl sm:text-5xl md:text-6xl font-heading font-bold text-white tracking-tight drop-shadow-2xl max-w-4xl">
+              {about.heroTitle}
             </h1>
           </AnimatedReveal>
 
           <AnimatedReveal delay={0.3}>
-            <p className="mb-10 text-lg sm:text-xl text-white/90 max-w-2xl mx-auto drop-shadow">
-              Providing clean, affordable and student-friendly accommodation near Loyola Polytechnic College.
+            <p className="mb-10 text-lg sm:text-xl text-white/70 max-w-2xl mx-auto drop-shadow-md">
+              {about.heroSubtitle}
             </p>
           </AnimatedReveal>
 
           <AnimatedReveal delay={0.4}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <PremiumButton href="tel:+910000000000" variant="primary" className="w-full sm:w-auto px-8 py-3.5 text-base">
-                <Phone size={18} className="mr-2" />
-                Call Now
-              </PremiumButton>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <PremiumButton 
-                href="/contact" 
-                variant="secondary" 
-                className="w-full sm:w-auto px-8 py-3.5 text-base bg-white hover:bg-slate-50 text-[#25D366] border-none shadow-lg"
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+              <a 
+                href={`tel:${websiteConfig.contact.phone}`}
+                className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 text-base font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(14,165,233,0.3)]"
               >
-                <MessageCircle size={18} className="mr-2" />
+                <Phone size={18} className="mr-3" />
+                Call Now
+              </a>
+              <a 
+                href={`https://wa.me/${websiteConfig.contact.whatsapp.replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 text-base font-medium bg-white/10 hover:bg-white/20 text-[#22C55E] border border-white/10 rounded-xl backdrop-blur-md transition-all"
+              >
+                <MessageCircle size={18} className="mr-3" />
                 WhatsApp
-              </PremiumButton>
+              </a>
             </div>
           </AnimatedReveal>
         </div>
       </section>
 
       {/* 2. OUR STORY SECTION */}
-      <SectionContainer className="py-20 bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="py-24 bg-slate-950 relative overflow-hidden">
+        <div className="absolute top-0 right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px] pointer-events-none mix-blend-screen" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             <AnimatedReveal direction="right">
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl border border-slate-100">
+              <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1000&auto=format&fit=crop" 
+                  src={about.storyImage} 
                   alt="Students relaxing" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transform scale-100 group-hover:scale-110 transition-transform duration-1000"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60" />
               </div>
             </AnimatedReveal>
             <AnimatedReveal direction="left">
-              <h2 className="text-3xl sm:text-4xl font-heading font-bold text-slate-900 mb-6">
-                Our Story
+              <h2 className="text-3xl sm:text-5xl font-heading font-bold text-white mb-8 drop-shadow-md">
+                {about.storyTitle}
               </h2>
-              <div className="prose prose-lg text-slate-600">
-                <p className="leading-relaxed">
-                  Sadhana Boys Hostel is dedicated to providing a comfortable and safe living environment for students and working professionals in Pulivendula. 
-                </p>
-                <p className="leading-relaxed mt-4">
-                  We understand that moving away from home can be challenging. That&apos;s why we focus on creating a supportive community where you can focus on your studies and career while we take care of your daily needs. From hygienic food to 24/7 security, everything is designed with your peace of mind as our priority.
-                </p>
+              <div className="prose prose-lg text-white/70">
+                {about.storyParagraphs.map((paragraph, index) => (
+                  <p key={index} className={`leading-relaxed ${index > 0 ? "mt-6" : ""}`}>
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             </AnimatedReveal>
           </div>
         </div>
-      </SectionContainer>
+      </section>
 
       {/* 3. WHY CHOOSE US */}
-      <SectionContainer className="py-24 bg-slate-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+      <section className="py-32 bg-slate-900 border-t border-white/5 relative overflow-hidden">
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent/10 blur-[120px] pointer-events-none mix-blend-screen" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-20">
             <AnimatedReveal>
-              <h2 className="text-3xl font-heading font-bold text-slate-900 sm:text-4xl">
+              <h2 className="text-4xl font-heading font-bold text-white sm:text-5xl drop-shadow-md">
                 Why Choose Us
               </h2>
-              <p className="mt-4 text-lg text-slate-600">
+              <p className="mt-6 text-xl text-white/60">
                 Everything you need for a hassle-free stay.
               </p>
             </AnimatedReveal>
@@ -121,51 +121,55 @@ export default function AboutPage() {
               { title: "Affordable Pricing", icon: IndianRupee, desc: "Value for money with no hidden charges." },
             ].map((feature, i) => (
               <AnimatedReveal key={i} delay={i * 0.1}>
-                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
-                    <feature.icon size={24} />
+                <div className="bg-white/5 p-10 rounded-[2rem] border border-white/10 hover:bg-white/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] group">
+                  <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center text-primary mb-8 group-hover:bg-primary group-hover:text-white transition-colors duration-500 shadow-[0_0_20px_rgba(14,165,233,0.2)] group-hover:shadow-[0_0_30px_rgba(14,165,233,0.5)]">
+                    <feature.icon size={28} />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
-                  <p className="text-slate-600">{feature.desc}</p>
+                  <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-primary transition-colors">{feature.title}</h3>
+                  <p className="text-white/60 leading-relaxed text-lg">{feature.desc}</p>
                 </div>
               </AnimatedReveal>
             ))}
           </div>
         </div>
-      </SectionContainer>
+      </section>
 
       {/* 4. LOCATION HIGHLIGHT */}
-      <SectionContainer className="py-20 bg-white">
+      <section className="py-24 bg-slate-950 relative">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           <AnimatedReveal>
-            <div className="bg-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 rounded-tr-full -z-10" />
+            <div className="bg-slate-900 p-8 sm:p-14 rounded-[3rem] border border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -z-10" />
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 rounded-full blur-[80px] -z-10" />
               
-              <MapPin size={40} className="mx-auto text-primary mb-6" />
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">
-                Prime Location
+              <MapPin size={48} className="mx-auto text-primary mb-8 drop-shadow-[0_0_15px_rgba(14,165,233,0.5)]" />
+              <h2 className="text-3xl sm:text-4xl font-heading font-bold text-white mb-8">
+                {about.locationBadge}
               </h2>
-              <ul className="space-y-3 text-lg text-slate-700 font-medium inline-block text-left mb-8">
-                <li className="flex items-center"><ArrowRight size={18} className="text-primary mr-3 shrink-0" /> Near Loyola Polytechnic College</li>
-                <li className="flex items-center"><ArrowRight size={18} className="text-primary mr-3 shrink-0" /> Palem Street</li>
-                <li className="flex items-center"><ArrowRight size={18} className="text-primary mr-3 shrink-0" /> Royals Road</li>
-                <li className="flex items-center"><ArrowRight size={18} className="text-primary mr-3 shrink-0" /> Near New Gangireddy Hospital</li>
+              <ul className="space-y-4 text-xl text-white/80 font-medium inline-block text-left mb-10">
+                {about.locationHighlights.map((highlight, idx) => (
+                  <li key={idx} className="flex items-center">
+                    <ArrowRight size={20} className="text-primary mr-4 shrink-0" /> {highlight}
+                  </li>
+                ))}
               </ul>
 
-              <div className="mt-8 inline-block bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl shadow-sm">
-                <p className="font-bold text-lg flex items-center justify-center">
-                  ⚠️ We are NOT near CKG College.
-                </p>
-              </div>
+              {about.locationNote && (
+                <div className="mt-4 inline-block bg-red-500/10 border border-red-500/20 text-red-400 px-8 py-4 rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+                  <p className="font-bold text-lg flex items-center justify-center">
+                    {about.locationNote}
+                  </p>
+                </div>
+              )}
             </div>
           </AnimatedReveal>
         </div>
-      </SectionContainer>
+      </section>
 
       {/* 5. TRUST SECTION */}
-      <SectionContainer className="py-24 bg-primary text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-primary relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none mix-blend-overlay" />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6 text-center">
             {[
               { label: "24/7 CCTV", icon: Video },
@@ -175,97 +179,86 @@ export default function AboutPage() {
               { label: "Comfortable Rooms", icon: Heart },
             ].map((trust, i) => (
               <AnimatedReveal key={i} delay={i * 0.1}>
-                <div className="flex flex-col items-center p-6 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-sm hover:bg-white/20 transition-colors">
-                  <trust.icon size={32} className="mb-4 text-white/90" />
-                  <span className="font-semibold text-sm sm:text-base">{trust.label}</span>
+                <div className="flex flex-col items-center p-8 rounded-[2rem] bg-white/10 border border-white/20 backdrop-blur-md hover:bg-white/20 hover:-translate-y-1 transition-all duration-300 shadow-xl">
+                  <trust.icon size={36} className="mb-5 text-white" />
+                  <span className="font-bold text-base sm:text-lg text-white tracking-wide">{trust.label}</span>
                 </div>
               </AnimatedReveal>
             ))}
           </div>
         </div>
-      </SectionContainer>
+      </section>
 
       {/* 6. STUDENT & EMPLOYEE ACCOMMODATION */}
-      <SectionContainer className="py-24 bg-slate-50">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+      <section className="py-32 bg-slate-900 relative">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
             <AnimatedReveal>
-              <h2 className="text-3xl font-bold text-slate-900 mb-4">Who is it for?</h2>
-              <p className="text-lg text-slate-600">Tailored accommodation options to suit your lifestyle.</p>
+              <h2 className="text-4xl font-heading font-bold text-white mb-6 drop-shadow-md">Who is it for?</h2>
+              <p className="text-xl text-white/60">Tailored accommodation options to suit your lifestyle.</p>
             </AnimatedReveal>
           </div>
-          <div className="grid sm:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-10">
             <AnimatedReveal direction="right">
-              <div className="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full hover:shadow-lg transition-shadow">
-                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+              <div className="bg-white/5 p-12 rounded-[3rem] border border-white/10 flex flex-col h-full hover:bg-white/10 transition-all duration-500 hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.5)] group">
+                <div className="w-20 h-20 bg-primary/20 text-primary rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(14,165,233,0.3)]">
                   <BookOpenIcon />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">Students</h3>
-                <p className="text-slate-600 leading-relaxed flex-grow">
-                  Quiet, focused environments perfect for studying. Close to major educational institutions like Loyola Polytechnic College. Includes high-speed WiFi for online classes and research.
+                <h3 className="text-3xl font-heading font-bold text-white mb-6">Students</h3>
+                <p className="text-white/60 leading-relaxed text-lg flex-grow">
+                  {about.studentsDescription}
                 </p>
-                <div className="mt-8 font-bold text-primary text-xl">₹3,500 / Month</div>
+                <div className="mt-10 font-bold text-primary text-3xl drop-shadow-md">{publicContent.roomTypes.find(r => r.id === 'students')?.price || "₹3,500"} <span className="text-lg text-white/40">/ {publicContent.roomTypes.find(r => r.id === 'students')?.period || "Month"}</span></div>
               </div>
             </AnimatedReveal>
             <AnimatedReveal direction="left">
-              <div className="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 flex flex-col h-full hover:shadow-lg transition-shadow">
-                <div className="w-16 h-16 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-6">
+              <div className="bg-white/5 p-12 rounded-[3rem] border border-white/10 flex flex-col h-full hover:bg-white/10 transition-all duration-500 hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.5)] group">
+                <div className="w-20 h-20 bg-orange-500/20 text-orange-400 rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(249,115,22,0.3)]">
                   <BriefcaseIcon />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">Working Professionals</h3>
-                <p className="text-slate-600 leading-relaxed flex-grow">
-                  Hassle-free living with flexible timings. Enjoy a peaceful rest after a long day at work. Prime location allows for easy daily commutes to offices and hospitals.
+                <h3 className="text-3xl font-heading font-bold text-white mb-6">Working Professionals</h3>
+                <p className="text-white/60 leading-relaxed text-lg flex-grow">
+                  {about.professionalsDescription}
                 </p>
-                <div className="mt-8 font-bold text-primary text-xl">₹5,000 / Month</div>
+                <div className="mt-10 font-bold text-orange-400 text-3xl drop-shadow-md">{publicContent.roomTypes.find(r => r.id === 'employees')?.price || "₹5,000"} <span className="text-lg text-white/40">/ {publicContent.roomTypes.find(r => r.id === 'employees')?.period || "Month"}</span></div>
               </div>
             </AnimatedReveal>
           </div>
         </div>
-      </SectionContainer>
-
-      {/* 7. GALLERY PREVIEW */}
-      <SectionContainer className="py-20 bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <AnimatedReveal>
-            <h2 className="text-3xl font-bold text-slate-900 mb-12">Glimpse of Your New Home</h2>
-          </AnimatedReveal>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {publicContent.gallery.slice(0, 3).map((img, i) => (
-              <AnimatedReveal key={i} delay={i * 0.1}>
-                <div className="relative aspect-square rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt="Hostel interior" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                </div>
-              </AnimatedReveal>
-            ))}
-          </div>
-        </div>
-      </SectionContainer>
+      </section>
 
       {/* 8. CTA SECTION */}
-      <SectionContainer className="py-24 bg-slate-50 border-t border-slate-200">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+      <section className="py-32 bg-slate-950 relative border-t border-white/5 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-slate-950 to-slate-950 pointer-events-none" />
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <AnimatedReveal>
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">
+            <h2 className="text-4xl sm:text-5xl font-heading font-bold text-white mb-8 drop-shadow-md">
               Looking for Safe Accommodation?
             </h2>
-            <p className="text-lg text-slate-600 mb-10">
+            <p className="text-xl text-white/60 mb-12">
               Rooms fill up fast. Get in touch with us today to book your spot!
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <PremiumButton href="tel:+910000000000" variant="primary" className="w-full sm:w-auto px-8 py-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-6">
+              <a 
+                href={`tel:${websiteConfig.contact.phone}`}
+                className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-5 text-lg font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(14,165,233,0.4)]"
+              >
+                <Phone size={20} className="mr-3" />
                 Call Now
-              </PremiumButton>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              <PremiumButton href="/contact" variant="secondary" className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-100 shadow-sm border border-slate-200 text-slate-900">
-                <MessageCircle size={18} className="mr-2 text-green-500" />
+              </a>
+              <a 
+                href={`https://wa.me/${websiteConfig.contact.whatsapp.replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-5 text-lg font-medium bg-white/10 hover:bg-white/20 text-[#22C55E] border border-white/10 rounded-xl backdrop-blur-md transition-all"
+              >
+                <MessageCircle size={20} className="mr-3" />
                 WhatsApp Us
-              </PremiumButton>
+              </a>
             </div>
           </AnimatedReveal>
         </div>
-      </SectionContainer>
+      </section>
       
     </div>
   );
