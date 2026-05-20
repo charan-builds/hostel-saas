@@ -3,6 +3,7 @@ import {
   BedDouble,
   Bell,
   CalendarCheck,
+  CalendarPlus,
   ClipboardList,
   CreditCard,
   DoorOpen,
@@ -83,6 +84,15 @@ export const NAVIGATION_GROUPS: NavigationGroup[] = [
         permissions: ["student:read"],
         branchScoped: true,
         requiresTenant: true,
+      },
+      {
+        href: "/bookings",
+        icon: CalendarPlus,
+        label: "Bookings",
+        permissions: ["booking:read"],
+        branchScoped: true,
+        requiresTenant: true,
+        roles: ["admin", "superadmin"],
       },
       {
         href: "/billing",

@@ -29,6 +29,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your_publishable_key
 SUPABASE_SECRET_KEY=sb_secret_your_server_secret_key
+AUTH_DEFAULT_PHONE_COUNTRY_CODE=+91
 RUN_SUPABASE_INTEGRATION_TESTS=0
 SUPABASE_INTEGRATION_TARGET=staging
 LOG_LEVEL=info
@@ -52,6 +53,16 @@ CASHFREE_WEBHOOK_SECRET=your_cashfree_webhook_secret_or_secret_key
 Keep server secrets unprefixed. Anything prefixed with `NEXT_PUBLIC_` is browser-visible in Next.js.
 Cashfree secrets are server-only and are only used by route handlers and webhook
 verification code.
+
+## Student Phone OTP
+
+Hosted Supabase projects must enable Phone Auth and configure an SMS provider
+before `/student-login` can send OTPs. The app normalizes non-E.164 student
+numbers with `AUTH_DEFAULT_PHONE_COUNTRY_CODE`, stores the normalized value in
+student metadata on create/update, and links verified phone users to the existing
+`user_profiles` and `tenant_memberships` model. Browser redirects do not grant
+access by themselves; the verified Supabase session and student membership are
+required for `/student-portal`.
 
 ## CLI Workflow
 

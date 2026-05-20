@@ -32,6 +32,40 @@ function normalizePhone(phone: string | null | undefined) {
   return digits.length >= 10 ? digits.slice(-10) : "9999999999";
 }
 
+function getOrderReference(input: CreatePaymentSessionInput) {
+  return (
+    input.referenceId ??
+    input.invoiceId ??
+    input.bookingRequestId ??
+    input.orderId
+  );
+}
+
+function getDefaultOrderTags(input: CreatePaymentSessionInput) {
+  if (input.orderTags) {
+    return input.orderTags;
+  }
+
+  if (input.invoiceId) {
+    return {
+      invoice_id: input.invoiceId,
+      reference_type: input.referenceType ?? "invoice",
+    };
+  }
+
+  if (input.bookingRequestId) {
+    return {
+      booking_request_id: input.bookingRequestId,
+      reference_type: input.referenceType ?? "booking",
+    };
+  }
+
+  return {
+    reference_id: getOrderReference(input),
+    reference_type: input.referenceType ?? "invoice",
+  };
+}
+
 function mapOrderStatus(status: string | null | undefined): ProviderOrder["status"] {
   switch (status?.toUpperCase()) {
     case "ACTIVE":
@@ -124,10 +158,8 @@ export class CashfreePaymentProvider
           notify_url: input.notifyUrl,
           return_url: input.returnUrl,
         },
-        order_note: `Invoice ${input.invoiceId}`,
-        order_tags: {
-          invoice_id: input.invoiceId,
-        },
+        order_note: input.orderNote ?? `Payment ${getOrderReference(input)}`,
+        order_tags: getDefaultOrderTags(input),
       }),
       headers: {
         "Content-Type": "application/json",

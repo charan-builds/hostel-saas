@@ -890,6 +890,291 @@ export type Database = {
           },
         ]
       }
+      booking_notes: {
+        Row: {
+          actor_user_id: string | null
+          body: string
+          booking_request_id: string
+          created_at: string
+          deleted_at: string | null
+          hostel_branch_id: string
+          id: string
+          metadata: Json
+          note_type: string
+          organization_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          body: string
+          booking_request_id: string
+          created_at?: string
+          deleted_at?: string | null
+          hostel_branch_id: string
+          id?: string
+          metadata?: Json
+          note_type?: string
+          organization_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          body?: string
+          booking_request_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          hostel_branch_id?: string
+          id?: string
+          metadata?: Json
+          note_type?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      booking_payments: {
+        Row: {
+          amount_cents: number
+          booking_request_id: string
+          cashfree_order_id: string | null
+          cashfree_payment_session_id: string | null
+          created_at: string
+          created_by: string | null
+          currency_code: string
+          deleted_at: string | null
+          hostel_branch_id: string
+          id: string
+          idempotency_key: string | null
+          metadata: Json
+          organization_id: string
+          payment_method: string
+          provider: string
+          provider_event_id: string | null
+          provider_reference: string | null
+          received_at: string | null
+          refundable: boolean
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount_cents: number
+          booking_request_id: string
+          cashfree_order_id?: string | null
+          cashfree_payment_session_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          deleted_at?: string | null
+          hostel_branch_id: string
+          id?: string
+          idempotency_key?: string | null
+          metadata?: Json
+          organization_id: string
+          payment_method?: string
+          provider?: string
+          provider_event_id?: string | null
+          provider_reference?: string | null
+          received_at?: string | null
+          refundable?: boolean
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          booking_request_id?: string
+          cashfree_order_id?: string | null
+          cashfree_payment_session_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          deleted_at?: string | null
+          hostel_branch_id?: string
+          id?: string
+          idempotency_key?: string | null
+          metadata?: Json
+          organization_id?: string
+          payment_method?: string
+          provider?: string
+          provider_event_id?: string | null
+          provider_reference?: string | null
+          received_at?: string | null
+          refundable?: boolean
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      booking_requests: {
+        Row: {
+          advance_amount_cents: number
+          advance_currency_code: string
+          advance_refundable: boolean
+          advance_required: boolean
+          assigned_to: string | null
+          booking_code: string
+          cashfree_order_id: string | null
+          cashfree_payment_session_id: string | null
+          converted_student_id: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          email: string | null
+          expected_stay_months: number | null
+          expires_at: string | null
+          first_name: string
+          guardian_name: string | null
+          guardian_phone: string | null
+          hostel_branch_id: string
+          id: string
+          ip_hash: string | null
+          last_contacted_at: string | null
+          last_name: string
+          message: string | null
+          metadata: Json
+          move_in_date: string | null
+          organization_id: string
+          phone: string
+          priority: string
+          public_access_expires_at: string
+          public_access_token_hash: string
+          requested_bed_count: number
+          room_category_id: string | null
+          room_id: string | null
+          room_template_id: string | null
+          room_type: string | null
+          source: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          advance_amount_cents?: number
+          advance_currency_code?: string
+          advance_refundable?: boolean
+          advance_required?: boolean
+          assigned_to?: string | null
+          booking_code?: string
+          cashfree_order_id?: string | null
+          cashfree_payment_session_id?: string | null
+          converted_student_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          expected_stay_months?: number | null
+          expires_at?: string | null
+          first_name: string
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          hostel_branch_id: string
+          id?: string
+          ip_hash?: string | null
+          last_contacted_at?: string | null
+          last_name: string
+          message?: string | null
+          metadata?: Json
+          move_in_date?: string | null
+          organization_id: string
+          phone: string
+          priority?: string
+          public_access_expires_at?: string
+          public_access_token_hash: string
+          requested_bed_count?: number
+          room_category_id?: string | null
+          room_id?: string | null
+          room_template_id?: string | null
+          room_type?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          advance_amount_cents?: number
+          advance_currency_code?: string
+          advance_refundable?: boolean
+          advance_required?: boolean
+          assigned_to?: string | null
+          booking_code?: string
+          cashfree_order_id?: string | null
+          cashfree_payment_session_id?: string | null
+          converted_student_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          expected_stay_months?: number | null
+          expires_at?: string | null
+          first_name?: string
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          hostel_branch_id?: string
+          id?: string
+          ip_hash?: string | null
+          last_contacted_at?: string | null
+          last_name?: string
+          message?: string | null
+          metadata?: Json
+          move_in_date?: string | null
+          organization_id?: string
+          phone?: string
+          priority?: string
+          public_access_expires_at?: string
+          public_access_token_hash?: string
+          requested_bed_count?: number
+          room_category_id?: string | null
+          room_id?: string | null
+          room_template_id?: string | null
+          room_type?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      booking_status_history: {
+        Row: {
+          actor_user_id: string | null
+          booking_request_id: string
+          created_at: string
+          from_status: string | null
+          hostel_branch_id: string
+          id: string
+          metadata: Json
+          note: string | null
+          organization_id: string
+          to_status: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          booking_request_id: string
+          created_at?: string
+          from_status?: string | null
+          hostel_branch_id: string
+          id?: string
+          metadata?: Json
+          note?: string | null
+          organization_id: string
+          to_status: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          booking_request_id?: string
+          created_at?: string
+          from_status?: string | null
+          hostel_branch_id?: string
+          id?: string
+          metadata?: Json
+          note?: string | null
+          organization_id?: string
+          to_status?: string
+        }
+        Relationships: []
+      }
       gate_pass_events: {
         Row: {
           actor_user_id: string | null
@@ -3624,6 +3909,17 @@ export type Database = {
           p_product: Database["public"]["Enums"]["saas_product"]
           p_settings?: Json
           p_timezone?: string
+        }
+        Returns: Json
+      }
+      convert_booking_to_student: {
+        Args: {
+          p_actor_user_id: string
+          p_bed_id?: string
+          p_booking_request_id: string
+          p_hostel_branch_id: string
+          p_organization_id: string
+          p_room_id?: string
         }
         Returns: Json
       }

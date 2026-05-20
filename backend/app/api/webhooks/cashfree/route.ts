@@ -6,6 +6,10 @@ import { createRequestLogger } from "@/lib/logger";
 import { createCashfreePaymentProvider } from "@/lib/payments/providers/cashfree/cashfree-provider";
 import { enforceRequestRateLimit } from "@/lib/security/request-protection";
 import { processCashfreeWebhook } from "@/modules/billing/billing.service";
+import {
+  processBookingCashfreeWebhook,
+  shouldProcessCashfreeWebhookAsBooking,
+} from "@/modules/bookings/bookings.service";
 
 export async function POST(request: NextRequest) {
   const requestId = getRequestId(request);
@@ -43,7 +47,12 @@ export async function POST(request: NextRequest) {
       signature: request.headers.get("x-webhook-signature"),
       timestamp: request.headers.get("x-webhook-timestamp"),
     });
-    const result = await processCashfreeWebhook({
+    const processWebhook = shouldProcessCashfreeWebhookAsBooking(
+      verifiedWebhook.payload,
+    )
+      ? processBookingCashfreeWebhook
+      : processCashfreeWebhook;
+    const result = await processWebhook({
       eventId: verifiedWebhook.eventId,
       eventTime: verifiedWebhook.eventTime,
       eventType: verifiedWebhook.eventType,

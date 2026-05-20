@@ -3,29 +3,29 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #faf9f6;
-  --foreground: #2d2a26;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --card: #ffffff;
-  --card-foreground: #2d2a26;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #2d2a26;
-  --primary: #4a5d4e;
+  --popover-foreground: #0f172a;
+  --primary: #0ea5e9;
   --primary-foreground: #ffffff;
-  --secondary: #e6e2dd;
-  --secondary-foreground: #2d2a26;
-  --muted: #f3f0eb;
-  --muted-foreground: #73706c;
-  --accent: #d4af37;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f97316;
   --accent-foreground: #ffffff;
-  --destructive: #9b3d35;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e6e2dd;
-  --input: #e6e2dd;
-  --ring: #4a5d4e;
-  --success: #4a5d4e;
-  --warning: #d4af37;
-  --info: #3b5998;
-  --radius: 0.25rem;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0ea5e9;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --radius: 0.5rem;
 }
 
 @theme inline {
@@ -60,28 +60,28 @@
 }
 
 .dark {
-  --background: #1f1e1c;
-  --foreground: #f3f0eb;
-  --card: #2d2a26;
-  --card-foreground: #f3f0eb;
-  --popover: #2d2a26;
-  --popover-foreground: #f3f0eb;
-  --primary: #6c8070;
+  --background: #020617;
+  --foreground: #f8fafc;
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
+  --primary: #0ea5e9;
   --primary-foreground: #ffffff;
-  --secondary: #3b3834;
-  --secondary-foreground: #e6e2dd;
-  --muted: #3b3834;
-  --muted-foreground: #a6a29e;
-  --accent: #e5c158;
-  --accent-foreground: #1f1e1c;
-  --destructive: #d45f55;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #f97316;
+  --accent-foreground: #ffffff;
+  --destructive: #7f1d1d;
   --destructive-foreground: #ffffff;
-  --border: #3b3834;
-  --input: #3b3834;
-  --ring: #6c8070;
-  --success: #6c8070;
-  --warning: #e5c158;
-  --info: #4f74c8;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #0ea5e9;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --info: #3b82f6;
 }
 
 * {

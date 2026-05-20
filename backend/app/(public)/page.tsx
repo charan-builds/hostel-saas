@@ -4,6 +4,7 @@ import { RoomShowcase } from "@/components/marketing/room-showcase";
 import { PricingCards } from "@/components/marketing/pricing-cards";
 import { TestimonialSlider } from "@/components/marketing/testimonial-slider";
 import { GallerySection } from "@/components/marketing/gallery-section";
+import { LocationMap } from "@/components/marketing/location-map";
 import { CTASection } from "@/components/marketing/cta-section";
 
 export default function MarketingHomePage() {
@@ -11,10 +12,11 @@ export default function MarketingHomePage() {
     <>
       <HeroSection />
       <FeatureGrid />
+      <PricingCards />
+      <GallerySection />
       <RoomShowcase />
       <TestimonialSlider />
-      <GallerySection />
-      <PricingCards />
+      <LocationMap />
       <CTASection />
     </>
   );

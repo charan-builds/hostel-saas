@@ -71,6 +71,16 @@ export const PERMISSION_REGISTRY = {
     module: "students",
     risk: "high",
   },
+  "booking:read": {
+    description: "Read public booking enquiries and follow-up history.",
+    module: "bookings",
+    risk: "medium",
+  },
+  "booking:manage": {
+    description: "Approve, reject, follow up, and convert public bookings.",
+    module: "bookings",
+    risk: "high",
+  },
   "billing:read": {
     description: "Read billing, invoice, receipt, and rent-plan data.",
     module: "billing",
@@ -187,6 +197,8 @@ export const ROLE_PERMISSIONS = {
     "student:read",
     "student:manage",
     "student:document:upload",
+    "booking:read",
+    "booking:manage",
     "billing:read",
     "billing:manage",
     "payment:record",

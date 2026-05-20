@@ -19,11 +19,16 @@ backend/
   app/
     (auth)/
       login/page.tsx
+      student-login/page.tsx
     (protected)/
       layout.tsx
       dashboard/page.tsx
       admin/page.tsx
       super-admin/page.tsx
+    (student)/
+      student-portal/page.tsx
+    api/auth/student/otp/send/route.ts
+    api/auth/student/otp/verify/route.ts
     api/v1/tenant/memberships/route.ts
     unauthorized/page.tsx
   components/
@@ -45,6 +50,7 @@ backend/
   modules/
     auth/
       actions.ts
+      phone-auth.service.ts
       schemas.ts
     tenant/
       actions.ts
@@ -64,6 +70,33 @@ Why:
 - Global superadmin bypass should be rare, explicit, and auditable.
 - Tenant membership rows let one user belong to multiple organizations or products.
 - Product scoping keeps the model reusable for hostel ERP, clothing shop ERP, gym ERP, and inventory ERP systems.
+
+## Student Phone OTP
+
+Student login is additive to the existing admin password flow. It uses Supabase
+phone OTP for session creation, then a server-only finalization step links the
+verified auth user to exactly one active `students` row.
+
+Flow:
+
+1. `POST /api/auth/student/otp/send` normalizes the phone number, rate-limits the
+   phone/IP, and only asks Supabase to send an OTP when one active student record
+   is eligible.
+2. `POST /api/auth/student/otp/verify` verifies the OTP with Supabase Auth.
+3. The service creates or updates the existing `user_profiles` row, creates an
+   active student `tenant_memberships` row, links `students.user_profile_id`, and
+   sets the active tenant cookie.
+4. `/student-portal` requires `student:self:read` and a student membership, then
+   relies on existing RLS for invoices, receipts, documents, attendance, leave,
+   notices, and room data.
+
+Why:
+
+- Supabase owns OTP expiry, single-use verification, and session cookies.
+- The application owns tenant membership linking and branch scoping.
+- Admin/superadmin email/password login stays untouched.
+- Student portal access is not granted by a phone number alone; the verified auth
+  user must be linked to an active student row.
 
 ## Proxy Rules
 

@@ -71,6 +71,18 @@ export const RENT_PLAN_SCOPE_TYPES = [
 
 export type RentPlanScopeType = (typeof RENT_PLAN_SCOPE_TYPES)[number];
 
+export const BOOKING_REQUEST_STATUSES = [
+  "pending",
+  "contacted",
+  "approved",
+  "rejected",
+  "expired",
+  "converted",
+  "cancelled",
+] as const;
+
+export type BookingRequestStatus = (typeof BOOKING_REQUEST_STATUSES)[number];
+
 export const NOTIFICATION_CHANNELS = [
   "in_app",
   "email",
@@ -112,6 +124,8 @@ export const PERMISSIONS = [
   "student:read",
   "student:manage",
   "student:document:upload",
+  "booking:read",
+  "booking:manage",
   "billing:read",
   "billing:manage",
   "payment:record",

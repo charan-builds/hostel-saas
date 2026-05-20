@@ -5,16 +5,16 @@ import { websiteConfig } from "@/config/website-config";
 
 export function Footer() {
   return (
-    <footer className="bg-slate-950 text-slate-300 py-12 md:py-16">
+    <footer className="bg-slate-50 text-slate-600 py-12 md:py-16 border-t border-slate-200">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-4">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-green-500 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold text-slate-900">
                 {websiteConfig.logo}
               </span>
             </Link>
-            <p className="max-w-xs text-sm text-slate-400 mb-6">
+            <p className="max-w-xs text-sm text-slate-500 mb-6">
               {websiteConfig.description}
             </p>
             <div className="flex gap-4">
@@ -48,13 +48,13 @@ export function Footer() {
           </div>
           
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
+            <h3 className="text-sm font-semibold text-slate-900 tracking-wider uppercase mb-4">
               Explore
             </h3>
             <ul className="space-y-3">
               {websiteConfig.mainNav.slice(0, 4).map((item) => (
                 <li key={item.title}>
-                  <Link href={item.href as Route} className="text-sm hover:text-white transition-colors">
+                  <Link href={item.href as Route} className="text-sm hover:text-primary transition-colors">
                     {item.title}
                   </Link>
                 </li>
@@ -63,27 +63,27 @@ export function Footer() {
           </div>
           
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
+            <h3 className="text-sm font-semibold text-slate-900 tracking-wider uppercase mb-4">
               Company
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/about" className="text-sm hover:text-white transition-colors">
+                <Link href="/about" className="text-sm hover:text-primary transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm hover:text-white transition-colors">
+                <Link href="/contact" className="text-sm hover:text-primary transition-colors">
                   Contact
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-sm hover:text-white transition-colors">
+                <Link href="#" className="text-sm hover:text-primary transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-sm hover:text-white transition-colors">
+                <Link href="#" className="text-sm hover:text-primary transition-colors">
                   Terms of Service
                 </Link>
               </li>
@@ -91,19 +91,19 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
+            <h3 className="text-sm font-semibold text-slate-900 tracking-wider uppercase mb-4">
               Contact
             </h3>
             <ul className="space-y-3">
               <li className="text-sm">
                 <span className="block text-slate-500 mb-1">Email</span>
-                <a href={`mailto:${websiteConfig.contact.email}`} className="hover:text-white transition-colors">
+                <a href={`mailto:${websiteConfig.contact.email}`} className="hover:text-primary transition-colors">
                   {websiteConfig.contact.email}
                 </a>
               </li>
               <li className="text-sm">
                 <span className="block text-slate-500 mb-1">Phone</span>
-                <a href={`tel:${websiteConfig.contact.phone.replace(/[^0-9+]/g, '')}`} className="hover:text-white transition-colors">
+                <a href={`tel:${websiteConfig.contact.phone.replace(/[^0-9+]/g, '')}`} className="hover:text-primary transition-colors">
                   {websiteConfig.contact.phone}
                 </a>
               </li>
@@ -111,12 +111,12 @@ export function Footer() {
           </div>
         </div>
         
-        <div className="mt-12 border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-12 border-t border-slate-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-slate-500">
             &copy; {new Date().getFullYear()} {websiteConfig.name}. All rights reserved.
           </p>
           <p className="text-sm text-slate-500 flex items-center gap-1">
-            Powered by <span className="font-semibold text-slate-400">Hostel ERP</span>
+            Powered by <span className="font-semibold text-slate-700">Hostel ERP</span>
           </p>
         </div>
       </div>

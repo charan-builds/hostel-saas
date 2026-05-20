@@ -1,9 +1,9 @@
 import { Home, Info, Phone, BedDouble, Building, Image as ImageIcon } from "lucide-react";
 
 export const websiteConfig = {
-  name: "Hostel Name",
-  tagline: "Elegant, Warm, and Premium Stays",
-  description: "Experience world-class student housing with modern amenities, vibrant community, and everything you need to succeed.",
+  name: "Sadhana Boys Hostel",
+  tagline: "Safe, Neat & Affordable Accommodation",
+  description: "Safe accommodation for students and working professionals near Loyola Polytechnic College.",
   logo: "Hostel Logo", // Can be text or image URL
   contact: {
     email: "contact@hostel.com",

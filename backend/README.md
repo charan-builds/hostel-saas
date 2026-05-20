@@ -38,6 +38,22 @@ also require `JOB_RUNNER_SECRET` before they will execute.
 
 See `../docs/supabase-real-project-setup.md` for the full hosted-project workflow.
 
+## Student Phone OTP Login
+
+Student portal login uses Supabase phone OTP and preserves the existing
+`user_profiles`, `tenant_memberships`, and RLS model. Enable phone authentication
+and configure an SMS provider in Supabase, then keep student phone numbers in
+international format where possible:
+
+```bash
+AUTH_DEFAULT_PHONE_COUNTRY_CODE=+91
+```
+
+Students request OTPs through `/student-login` or
+`POST /api/auth/student/otp/send`, then verify through
+`POST /api/auth/student/otp/verify`. The verified session opens
+`/student-portal`.
+
 ## Cashfree Payments
 
 Online rent collection uses Cashfree from server-only route handlers. Add these
@@ -54,6 +70,25 @@ Use `POST /api/v1/billing/invoices/[invoiceId]/payment-session` to create the
 checkout session. Configure Cashfree to send payment webhooks to
 `/api/webhooks/cashfree`; browser redirects are informational and do not finalize
 payments.
+
+## Public Booking Workflow
+
+Public hostel enquiries use booking-specific tables and APIs instead of writing
+directly into students or billing. The main endpoints are:
+
+```bash
+GET  /api/public/bookings/availability
+POST /api/public/bookings
+POST /api/public/bookings/contact
+POST /api/public/bookings/:bookingRequestId/payment-session
+GET  /api/v1/bookings
+PATCH /api/v1/bookings/:bookingRequestId/status
+POST /api/v1/bookings/:bookingRequestId/convert
+```
+
+Public payment sessions are advance-payment only and require the public access
+token returned at booking creation. Cashfree webhooks finalize booking payments;
+frontend redirects never mark bookings as paid.
 
 ## Real Integration Tests
 

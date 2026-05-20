@@ -11,12 +11,17 @@ export type PaymentSessionCustomer = {
 
 export type CreatePaymentSessionInput = {
   amountCents: number;
+  bookingRequestId?: string | undefined;
   currencyCode: string;
   customer: PaymentSessionCustomer;
   idempotencyKey: string;
-  invoiceId: string;
+  invoiceId?: string | undefined;
   notifyUrl: string;
+  orderNote?: string | undefined;
+  orderTags?: Record<string, string> | undefined;
   orderId: string;
+  referenceId?: string | undefined;
+  referenceType?: "booking" | "invoice" | undefined;
   requestId: string;
   returnUrl: string;
 };
