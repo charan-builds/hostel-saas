@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { FormActions, FormSection } from "@/components/forms/form-section";
 import { createRentPlanAction } from "@/modules/billing/actions";
 import type { RentPlan } from "@/modules/billing/billing.service";
 
@@ -46,7 +47,7 @@ type RentPlanFormProps = {
 };
 
 const fieldClassName =
-  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  "erp-control w-full";
 
 export function RentPlanForm({
   beds,
@@ -59,10 +60,13 @@ export function RentPlanForm({
   return (
     <form
       action={createRentPlanAction}
-      className="space-y-6 rounded-lg border border-border bg-card p-5 text-card-foreground shadow-sm"
+      className="space-y-5"
     >
       <input name="organizationId" type="hidden" value={organizationId} />
-      <div className="grid gap-4 md:grid-cols-2">
+      <FormSection
+        description="Define which branch, room, bed, or student this rent rule applies to."
+        title="Plan scope"
+      >
         <label className="space-y-2">
           <span className="text-sm font-medium">Branch</span>
           <select
@@ -83,15 +87,6 @@ export function RentPlanForm({
             className={fieldClassName}
             name="code"
             placeholder="BRANCH-MONTHLY"
-            required
-          />
-        </label>
-        <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-medium">Plan name</span>
-          <input
-            className={fieldClassName}
-            name="name"
-            placeholder="Monthly hostel rent"
             required
           />
         </label>
@@ -160,6 +155,21 @@ export function RentPlanForm({
             ))}
           </select>
         </label>
+      </FormSection>
+
+      <FormSection
+        description="Use stable codes and clear names so monthly invoice generation remains easy to audit."
+        title="Plan details"
+      >
+        <label className="space-y-2 md:col-span-2">
+          <span className="text-sm font-medium">Plan name</span>
+          <input
+            className={fieldClassName}
+            name="name"
+            placeholder="Monthly hostel rent"
+            required
+          />
+        </label>
         <label className="space-y-2">
           <span className="text-sm font-medium">Monthly amount</span>
           <input
@@ -180,6 +190,12 @@ export function RentPlanForm({
             name="currencyCode"
           />
         </label>
+      </FormSection>
+
+      <FormSection
+        description="Controls when invoices become due and how long this rent rule remains active."
+        title="Billing schedule"
+      >
         <label className="space-y-2">
           <span className="text-sm font-medium">Due day</span>
           <input
@@ -218,16 +234,16 @@ export function RentPlanForm({
             type="date"
           />
         </label>
-      </div>
+      </FormSection>
       <div className="rounded-md border border-border bg-muted/50 p-4">
         <p className="text-sm font-medium">Existing plans</p>
         <p className="mt-1 text-sm text-muted-foreground">
           {rentPlans.length} active or historical plan records in this tenant scope.
         </p>
       </div>
-      <Button type="submit">
-        Create rent plan
-      </Button>
+      <FormActions>
+        <Button type="submit">Create rent plan</Button>
+      </FormActions>
     </form>
   );
 }

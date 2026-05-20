@@ -19,10 +19,10 @@ export function NavLink({ href, title, onClick, isMobile = false }: NavLinkProps
       <Link
         href={href}
         {...(onClick ? { onClick: () => onClick() } : {})}
-        className={`block px-4 py-3 text-lg transition-colors ${
+        className={`block px-5 py-4 text-xl transition-all duration-300 ${
           isActive
-            ? "text-primary font-semibold"
-            : "text-foreground hover:text-primary hover:bg-muted/50 rounded-md"
+            ? "text-[#0EA5E9] font-bold bg-[#0EA5E9]/10 rounded-xl"
+            : "text-foreground hover:text-[#0EA5E9] hover:bg-slate-100 rounded-xl"
         }`}
       >
         {title}
@@ -33,18 +33,20 @@ export function NavLink({ href, title, onClick, isMobile = false }: NavLinkProps
   return (
     <Link
       href={href}
-      className="group relative px-1 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white"
+      className={`group relative px-2 py-2 text-sm md:text-base font-bold tracking-wide transition-colors duration-300 ${
+        isActive ? "text-white" : "text-white/70 hover:text-white"
+      }`}
     >
       {title}
       {isActive && (
         <motion.div
           layoutId="navbar-active-indicator"
-          className="absolute -bottom-1 left-0 right-0 h-[2px] bg-primary"
+          className="absolute -bottom-2 left-0 right-0 h-[3px] bg-[#0EA5E9] rounded-full"
           initial={false}
-          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
         />
       )}
-      <div className="absolute -bottom-1 left-0 right-0 h-[2px] origin-left scale-x-0 bg-primary/50 transition-transform duration-300 ease-out group-hover:scale-x-100" />
+      <div className="absolute -bottom-2 left-0 right-0 h-[3px] origin-left scale-x-0 bg-[#0EA5E9]/50 rounded-full transition-transform duration-300 ease-out group-hover:scale-x-100" />
     </Link>
   );
 }

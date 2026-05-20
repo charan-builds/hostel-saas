@@ -3,15 +3,10 @@
 import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { SectionCard } from "@/components/ui/section-card";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { cn } from "@/lib/utils";
 
 type StudentDocumentUploadFormProps = {
   studentId: string;
@@ -28,7 +23,7 @@ type UploadUrlResponse = {
 };
 
 const selectClassName =
-  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2";
+  "erp-control w-full";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -62,6 +57,7 @@ export function StudentDocumentUploadForm({
   studentId,
 }: StudentDocumentUploadFormProps) {
   const [message, setMessage] = useState<string | undefined>();
+  const [messageTone, setMessageTone] = useState<"error" | "success">("success");
   const [isUploading, setIsUploading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -73,11 +69,13 @@ export function StudentDocumentUploadForm({
     const documentType = formData.get("documentType");
 
     if (!(file instanceof File) || file.size === 0) {
+      setMessageTone("error");
       setMessage("Choose a document before uploading.");
       return;
     }
 
     if (typeof documentType !== "string") {
+      setMessageTone("error");
       setMessage("Choose a document type before uploading.");
       return;
     }
@@ -124,8 +122,10 @@ export function StudentDocumentUploadForm({
       await parseJsonResponse(completeResponse);
 
       form.reset();
+      setMessageTone("success");
       setMessage("Document uploaded.");
     } catch (error) {
+      setMessageTone("error");
       setMessage(error instanceof Error ? error.message : "Document upload failed.");
     } finally {
       setIsUploading(false);
@@ -133,16 +133,12 @@ export function StudentDocumentUploadForm({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Upload document</CardTitle>
-        <CardDescription>
-          Attach student identity, guardian, address, medical, or supporting records.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <SectionCard
+      description="Attach student identity, guardian, address, medical, or supporting records."
+      title="Upload document"
+    >
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="grid gap-4 md:grid-cols-[180px_1fr_auto]">
+          <div className="grid gap-4 lg:grid-cols-[190px_1fr_auto]">
             <label className="space-y-2">
               <span className="text-sm font-medium">Document type</span>
               <select className={selectClassName} name="documentType" required>
@@ -161,18 +157,28 @@ export function StudentDocumentUploadForm({
                 required
                 type="file"
               />
+              <span className="block text-xs text-muted-foreground">
+                PDF, JPG, PNG, or WebP. Upload is verified before the document is marked complete.
+              </span>
             </label>
             <Button className="self-end" disabled={isUploading} type="submit">
-              {isUploading ? "Uploading" : "Upload"}
+              {isUploading ? "Uploading..." : "Upload"}
             </Button>
           </div>
           {message ? (
-            <p aria-live="polite" className="text-sm text-muted-foreground">
+            <p
+              aria-live="polite"
+              className={cn(
+                "rounded-md border px-3 py-2 text-sm",
+                messageTone === "success"
+                  ? "border-success/25 bg-success/10 text-foreground"
+                  : "border-destructive/25 bg-destructive/10 text-foreground",
+              )}
+            >
               {message}
             </p>
           ) : null}
         </form>
-      </CardContent>
-    </Card>
+    </SectionCard>
   );
 }

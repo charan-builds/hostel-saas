@@ -13,7 +13,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/state";
-import { StatusChip } from "@/components/ui/status-chip";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { Database } from "@/types/database.types";
 
 type StudentRow = Database["public"]["Tables"]["students"]["Row"];
@@ -50,7 +50,7 @@ function StudentQuickActions({
   student: StudentRow;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center justify-end gap-2">
       <Button asChild size="sm" variant="outline">
         <Link href={studentRoute(student.id)}>
           <UserRound aria-hidden="true" />
@@ -147,16 +147,16 @@ export function StudentTable({
 
   return (
     <div className="space-y-4">
-      <div className="hidden overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm md:block">
+      <div className="erp-table-shell hidden md:block">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[980px] border-collapse text-left text-sm">
-            <thead className="bg-muted/70 text-muted-foreground">
+          <table className="w-full min-w-[1120px] border-collapse text-left text-sm">
+            <thead className="sticky top-0 z-10 bg-muted/85 text-muted-foreground backdrop-blur">
               <tr>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-normal">
                   Student
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-normal">
-                  Branch
+                  Location
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-normal">
                   Contact
@@ -167,7 +167,10 @@ export function StudentTable({
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-normal">
                   Admission
                 </th>
-                <th className="sticky right-0 bg-muted/70 px-4 py-3 text-xs font-semibold uppercase tracking-normal">
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-normal">
+                  Operational links
+                </th>
+                <th className="sticky right-0 bg-muted/85 px-4 py-3 text-right text-xs font-semibold uppercase tracking-normal backdrop-blur">
                   Actions
                 </th>
               </tr>
@@ -175,7 +178,7 @@ export function StudentTable({
             <tbody className="divide-y divide-border">
               {students.map((student) => (
                 <tr className="hover:bg-muted/50" key={student.id}>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 align-top">
                     <Link
                       className="font-semibold text-foreground hover:underline"
                       href={studentRoute(student.id)}
@@ -186,19 +189,47 @@ export function StudentTable({
                       {student.student_code}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {branchNames[student.hostel_branch_id] ?? "Assigned branch"}
+                  <td className="px-4 py-3 align-top">
+                    <p className="font-medium">
+                      {branchNames[student.hostel_branch_id] ?? "Assigned branch"}
+                    </p>
+                    <Link
+                      className="mt-1 inline-flex text-xs font-medium text-muted-foreground hover:text-foreground"
+                      href={studentRoute(student.id, "/edit#assign-bed")}
+                    >
+                      Room and bed
+                    </Link>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {student.email ?? student.phone ?? "Not provided"}
+                  <td className="px-4 py-3 align-top text-muted-foreground">
+                    <p>{student.phone ?? "No phone"}</p>
+                    <p className="mt-1 text-xs">{student.email ?? "No email"}</p>
                   </td>
-                  <td className="px-4 py-3">
-                    <StatusChip status={student.status} />
+                  <td className="px-4 py-3 align-top">
+                    <StatusBadge status={student.status} />
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  <td className="px-4 py-3 align-top text-muted-foreground">
                     {formatDate(student.admission_date)}
                   </td>
-                  <td className="sticky right-0 bg-card px-4 py-3">
+                  <td className="px-4 py-3 align-top">
+                    <div className="flex flex-wrap gap-2">
+                      <Button asChild size="sm" variant="ghost">
+                        <Link href={studentRoute(student.id, "#dues")}>
+                          Dues
+                        </Link>
+                      </Button>
+                      <Button asChild size="sm" variant="ghost">
+                        <Link href={studentRoute(student.id, "#attendance")}>
+                          Attendance
+                        </Link>
+                      </Button>
+                      <Button asChild size="sm" variant="ghost">
+                        <Link href={studentRoute(student.id, "#documents")}>
+                          Docs
+                        </Link>
+                      </Button>
+                    </div>
+                  </td>
+                  <td className="sticky right-0 bg-card px-4 py-3 align-top shadow-[-12px_0_24px_-24px_rgb(15_23_42_/_0.45)]">
                     <StudentQuickActions
                       canManageStudents={canManageStudents}
                       student={student}
@@ -214,7 +245,7 @@ export function StudentTable({
       <div className="grid gap-3 md:hidden">
         {students.map((student) => (
           <article
-            className="rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm"
+            className="rounded-lg border border-border bg-card p-4 text-card-foreground shadow-[var(--erp-shadow-card)]"
             key={student.id}
           >
             <div className="flex items-start justify-between gap-3">
@@ -229,13 +260,24 @@ export function StudentTable({
                   {student.student_code}
                 </p>
               </div>
-              <StatusChip status={student.status} />
+              <StatusBadge status={student.status} />
             </div>
             <dl className="mt-4 grid gap-3 text-sm">
               <div className="flex justify-between gap-4">
                 <dt className="text-muted-foreground">Branch</dt>
                 <dd className="text-right font-medium">
                   {branchNames[student.hostel_branch_id] ?? "Assigned branch"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">Room / bed</dt>
+                <dd className="text-right">
+                  <Link
+                    className="font-medium hover:underline"
+                    href={studentRoute(student.id, "/edit#assign-bed")}
+                  >
+                    Manage
+                  </Link>
                 </dd>
               </div>
               <div className="flex justify-between gap-4">

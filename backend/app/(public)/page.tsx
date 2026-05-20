@@ -1,23 +1,8 @@
-import { HeroSection } from "@/components/marketing/hero-section";
-import { FeatureGrid } from "@/components/marketing/feature-grid";
-import { RoomShowcase } from "@/components/marketing/room-showcase";
-import { PricingCards } from "@/components/marketing/pricing-cards";
-import { TestimonialSlider } from "@/components/marketing/testimonial-slider";
-import { GallerySection } from "@/components/marketing/gallery-section";
-import { LocationMap } from "@/components/marketing/location-map";
-import { CTASection } from "@/components/marketing/cta-section";
+import { getTenantCMS } from "@/lib/tenant/cms";
+import { PageRenderer } from "@/components/marketing/page-renderer";
 
-export default function MarketingHomePage() {
-  return (
-    <>
-      <HeroSection />
-      <FeatureGrid />
-      <PricingCards />
-      <GallerySection />
-      <RoomShowcase />
-      <TestimonialSlider />
-      <LocationMap />
-      <CTASection />
-    </>
-  );
+export default async function MarketingHomePage() {
+  const { publicContent } = await getTenantCMS();
+  
+  return <PageRenderer sections={publicContent.pageSections} />;
 }

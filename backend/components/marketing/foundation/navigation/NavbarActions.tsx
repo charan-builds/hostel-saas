@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { PremiumButton } from "../PremiumButton";
-import { websiteConfig } from "@/config/website-config";
+import { useTenantCMS } from "@/components/providers/tenant-provider";
 
 interface NavbarActionsProps {
   isLoggedIn: boolean;
@@ -10,6 +10,7 @@ interface NavbarActionsProps {
 }
 
 export function NavbarActions({ isLoggedIn, isMobile = false, onMobileClick }: NavbarActionsProps) {
+  const { websiteConfig } = useTenantCMS();
   const containerClass = isMobile ? "flex flex-col gap-4 mt-6" : "hidden md:flex items-center gap-6";
 
   if (isLoggedIn) {

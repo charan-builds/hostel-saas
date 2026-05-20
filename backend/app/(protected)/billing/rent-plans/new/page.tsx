@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { RentPlanForm } from "@/components/billing/rent-plan-form";
+import { ErpPage } from "@/components/layout/erp-page";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
@@ -14,7 +15,7 @@ export default async function NewRentPlanPage() {
   const options = await getBillingFormOptions();
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <Button asChild variant="outline">
@@ -33,6 +34,6 @@ export default async function NewRentPlanPage() {
         rooms={options.rooms}
         students={options.students}
       />
-    </section>
+    </ErpPage>
   );
 }

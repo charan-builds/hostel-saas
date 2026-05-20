@@ -11,18 +11,13 @@ import {
   WalletCards,
 } from "lucide-react";
 
+import { ErpPage, ErpPageGrid } from "@/components/layout/erp-page";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
 import { EmptyState } from "@/components/ui/state";
 import { StatCard } from "@/components/ui/stat-card";
-import { StatusChip } from "@/components/ui/status-chip";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
@@ -259,7 +254,7 @@ export default async function StudentDetailPage({
   ).length;
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <>
@@ -285,11 +280,11 @@ export default async function StudentDetailPage({
         }
         description={`${summary.branch?.name ?? "Active branch"} · admitted ${formatDate(student.admission_date)}`}
         eyebrow={student.student_code}
-        meta={<StatusChip status={student.status} />}
+        meta={<StatusBadge status={student.status} />}
         title={`${student.first_name} ${student.last_name}`}
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <ErpPageGrid>
         <StatCard
           description={`${summary.invoices.length} recent invoices`}
           href={"#dues" as Route}
@@ -319,15 +314,13 @@ export default async function StudentDetailPage({
           label="Documents"
           value={String(summary.documents.length)}
         />
-      </div>
+      </ErpPageGrid>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Student profile</CardTitle>
-            <CardDescription>Contact, guardian, and emergency information.</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <SectionCard
+          description="Contact, guardian, and emergency information."
+          title="Student profile"
+        >
             <dl>
               <DetailRow label="Email" value={student.email} />
               <DetailRow label="Phone" value={student.phone} />
@@ -335,15 +328,13 @@ export default async function StudentDetailPage({
               <DetailRow label="Gender" value={student.gender?.replaceAll("_", " ")} />
               <DetailRow label="Date of birth" value={formatDate(student.date_of_birth)} />
             </dl>
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Operational actions</CardTitle>
-            <CardDescription>Jump into common desk workflows.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-2">
+        <SectionCard
+          contentClassName="grid gap-2"
+          description="Jump into common desk workflows."
+          title="Operational actions"
+        >
             <Button asChild className="justify-start" variant="outline">
               <Link href={editRoute(student.id, "#assign-bed")}>
                 <BedDouble aria-hidden="true" />
@@ -368,20 +359,16 @@ export default async function StudentDetailPage({
                 Mark inactive
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+        </SectionCard>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <Card id="dues">
-          <CardHeader>
-            <CardTitle>Dues and invoices</CardTitle>
-            <CardDescription>
-              {formatCurrency(dueCents, currencyCode)} pending ·{" "}
-              {formatCurrency(paidCents, currencyCode)} recently paid
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <SectionCard
+          contentClassName="space-y-3"
+          description={`${formatCurrency(dueCents, currencyCode)} pending · ${formatCurrency(paidCents, currencyCode)} recently paid`}
+          id="dues"
+          title="Dues and invoices"
+        >
             {summary.invoices.length === 0 ? (
               <EmptyState
                 description="Invoices will appear after rent generation."
@@ -390,7 +377,7 @@ export default async function StudentDetailPage({
             ) : (
               summary.invoices.map((invoice) => (
                 <Link
-                  className="flex items-center justify-between gap-4 rounded-md border border-border px-3 py-3 text-sm hover:bg-accent"
+                  className="flex items-center justify-between gap-4 rounded-md border border-border px-3 py-3 text-sm hover:bg-muted"
                   href={`/billing/invoices/${invoice.id}` as Route}
                   key={invoice.id}
                 >
@@ -401,7 +388,7 @@ export default async function StudentDetailPage({
                     </span>
                   </span>
                   <span className="text-right">
-                    <StatusChip status={invoice.status} />
+                    <StatusBadge status={invoice.status} />
                     <span className="mt-1 block text-xs font-medium">
                       {formatCurrency(invoice.balance_cents, invoice.currency_code)}
                     </span>
@@ -409,15 +396,13 @@ export default async function StudentDetailPage({
                 </Link>
               ))
             )}
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment history</CardTitle>
-            <CardDescription>Recent receipts and offline collection records.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <SectionCard
+          contentClassName="space-y-3"
+          description="Recent receipts and offline collection records."
+          title="Payment history"
+        >
             {summary.payments.length === 0 ? (
               <EmptyState
                 description="Payments will appear after rent is collected."
@@ -441,17 +426,16 @@ export default async function StudentDetailPage({
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+        </SectionCard>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
-        <Card id="attendance">
-          <CardHeader>
-            <CardTitle>Attendance</CardTitle>
-            <CardDescription>Latest daily presence records.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <SectionCard
+          contentClassName="space-y-3"
+          description="Latest daily presence records."
+          id="attendance"
+          title="Attendance"
+        >
             {summary.attendance.length === 0 ? (
               <p className="text-sm text-muted-foreground">No attendance records found.</p>
             ) : (
@@ -461,19 +445,17 @@ export default async function StudentDetailPage({
                   key={record.id}
                 >
                   <span>{formatDate(record.attendance_date)}</span>
-                  <StatusChip status={record.status} />
+                  <StatusBadge status={record.status} />
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Leave</CardTitle>
-            <CardDescription>{pendingLeaves} pending requests.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <SectionCard
+          contentClassName="space-y-3"
+          description={`${pendingLeaves} pending requests.`}
+          title="Leave"
+        >
             {summary.leaveRequests.length === 0 ? (
               <p className="text-sm text-muted-foreground">No leave requests found.</p>
             ) : (
@@ -486,7 +468,7 @@ export default async function StudentDetailPage({
                     <span className="font-medium">
                       {request.leave_type.replaceAll("_", " ")}
                     </span>
-                    <StatusChip status={request.status} />
+                    <StatusBadge status={request.status} />
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {formatDateTime(request.starts_at)} to{" "}
@@ -495,15 +477,14 @@ export default async function StudentDetailPage({
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+        </SectionCard>
 
-        <Card id="documents">
-          <CardHeader>
-            <CardTitle>Documents</CardTitle>
-            <CardDescription>Recent upload and verification state.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <SectionCard
+          contentClassName="space-y-3"
+          description="Recent upload and verification state."
+          id="documents"
+          title="Documents"
+        >
             {summary.documents.length === 0 ? (
               <p className="text-sm text-muted-foreground">No documents uploaded.</p>
             ) : (
@@ -514,7 +495,7 @@ export default async function StudentDetailPage({
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="truncate font-medium">{document.file_name}</span>
-                    <StatusChip status={document.status} />
+                    <StatusBadge status={document.status} />
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {document.document_type.replaceAll("_", " ")} ·{" "}
@@ -523,9 +504,8 @@ export default async function StudentDetailPage({
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+        </SectionCard>
       </div>
-    </section>
+    </ErpPage>
   );
 }

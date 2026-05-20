@@ -5,6 +5,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+import { ErpPageGrid } from "@/components/layout/erp-page";
 import { StatCard } from "@/components/ui/stat-card";
 import type { BillingSummary } from "@/modules/billing/billing.service";
 import { formatCurrency } from "@/lib/utils";
@@ -49,7 +50,7 @@ export function RevenueCards({ summary }: RevenueCardsProps) {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <ErpPageGrid>
       {cards.map((card) => (
         <StatCard
           description={card.description}
@@ -60,6 +61,6 @@ export function RevenueCards({ summary }: RevenueCardsProps) {
           value={card.value}
         />
       ))}
-    </div>
+    </ErpPageGrid>
   );
 }

@@ -1,4 +1,3 @@
-import { Home, Info, Phone, BedDouble, Building, Image as ImageIcon, FileText } from "lucide-react";
 
 export const websiteConfig = {
   name: "Sadhana Boys Hostel",
@@ -19,12 +18,12 @@ export const websiteConfig = {
     github: "https://github.com",
   },
   mainNav: [
-    { title: "Home", href: "/", icon: Home },
-    { title: "About", href: "/about", icon: Info },
-    { title: "Rooms", href: "/our-rooms", icon: BedDouble },
-    { title: "Facilities", href: "/facilities", icon: Building },
-    { title: "Gallery", href: "/gallery", icon: ImageIcon },
-    { title: "Contact", href: "/contact", icon: Phone },
-    { title: "Terms", href: "/terms", icon: FileText },
+    { title: "Home", href: "/", icon: "home" },
+    { title: "About", href: "/about", icon: "info" },
+    { title: "Rooms", href: "/our-rooms", icon: "bed" },
+    { title: "Facilities", href: "/facilities", icon: "building" },
+    { title: "Gallery", href: "/gallery", icon: "image" },
+    { title: "Contact", href: "/contact", icon: "phone" },
+    { title: "Terms", href: "/terms", icon: "fileText" },
   ],
 } as const;

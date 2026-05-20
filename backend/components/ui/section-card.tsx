@@ -15,6 +15,7 @@ type SectionCardProps = {
   className?: string;
   contentClassName?: string;
   description?: ReactNode;
+  id?: string;
   title?: string;
 };
 
@@ -24,12 +25,13 @@ export function SectionCard({
   className,
   contentClassName,
   description,
+  id,
   title,
 }: SectionCardProps) {
   const hasHeader = Boolean(title || description || actions);
 
   return (
-    <Card className={className}>
+    <Card className={className} id={id}>
       {hasHeader ? (
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1.5">

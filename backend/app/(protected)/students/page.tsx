@@ -7,6 +7,7 @@ import { StudentTable } from "@/components/students/student-table";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { SearchFilterBar } from "@/components/ui/search-filter-bar";
+import { SectionCard } from "@/components/ui/section-card";
 import { StatCard } from "@/components/ui/stat-card";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -88,6 +89,11 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
   const selectedBranchName = query.hostelBranchId
     ? branchById.get(query.hostelBranchId)
     : undefined;
+  const activeFilters = [
+    query.q ? `Search: ${query.q}` : undefined,
+    selectedBranchName ? `Branch: ${selectedBranchName}` : undefined,
+    query.status ? `Status: ${query.status}` : undefined,
+  ].filter((value): value is string => Boolean(value));
 
   return (
     <ErpPage>
@@ -135,57 +141,82 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
         />
       </ErpPageGrid>
 
-      <form action="/students">
-        <SearchFilterBar
-          actions={
-            <Button type="submit" variant="outline">
-              Apply filters
-            </Button>
-          }
-          defaultValue={query.q ?? ""}
-          placeholder="Search by code, name, email"
-        >
-          <select
-            aria-label="Filter students by branch"
-            className={selectClassName}
-            defaultValue={query.hostelBranchId ?? ""}
-            name="hostelBranchId"
+      <SectionCard
+        contentClassName="space-y-4"
+        description="Search admissions and narrow the working list by branch or status."
+        title="Student directory"
+      >
+        <form action="/students">
+          <SearchFilterBar
+            actions={
+              <>
+                <Button type="submit" variant="outline">
+                  Apply filters
+                </Button>
+                <Button asChild variant="ghost">
+                  <Link href="/students">Reset</Link>
+                </Button>
+              </>
+            }
+            defaultValue={query.q ?? ""}
+            placeholder="Search code, name, email"
+            surface="embedded"
           >
-            <option value="">All branches</option>
-            {branches.map((branch) => (
-              <option key={branch.id} value={branch.id}>
-                {branch.name}
-              </option>
+            <select
+              aria-label="Filter students by branch"
+              className={selectClassName}
+              defaultValue={query.hostelBranchId ?? ""}
+              name="hostelBranchId"
+            >
+              <option value="">All branches</option>
+              {branches.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="Filter students by status"
+              className={selectClassName}
+              defaultValue={query.status ?? ""}
+              name="status"
+            >
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+            <select
+              aria-label="Rows per page"
+              className={selectClassName}
+              defaultValue={String(query.limit)}
+              name="limit"
+            >
+              <option value="10">10 rows</option>
+              <option value="20">20 rows</option>
+              <option value="50">50 rows</option>
+              <option value="100">100 rows</option>
+            </select>
+          </SearchFilterBar>
+        </form>
+        {activeFilters.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Active filters</span>
+            {activeFilters.map((filter) => (
+              <span
+                className="rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-medium"
+                key={filter}
+              >
+                {filter}
+              </span>
             ))}
-          </select>
-          <select
-            aria-label="Filter students by status"
-            className={selectClassName}
-            defaultValue={query.status ?? ""}
-            name="status"
-          >
-            <option value="">All statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-          <select
-            aria-label="Rows per page"
-            className={selectClassName}
-            defaultValue={String(query.limit)}
-            name="limit"
-          >
-            <option value="10">10 rows</option>
-            <option value="20">20 rows</option>
-            <option value="50">50 rows</option>
-            <option value="100">100 rows</option>
-          </select>
-        </SearchFilterBar>
-      </form>
-      <StudentTable
-        branchNames={Object.fromEntries(branchById)}
-        canManageStudents={context.role === "admin" || context.role === "superadmin"}
-        students={students.data}
-      />
+          </div>
+        ) : null}
+        <StudentTable
+          branchNames={Object.fromEntries(branchById)}
+          canManageStudents={context.role === "admin" || context.role === "superadmin"}
+          students={students.data}
+        />
+      </SectionCard>
       <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <p>
           Page {students.page} of {students.pageCount}, {students.count} total
@@ -193,7 +224,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
         <nav className="flex items-center gap-2" aria-label="Student pagination">
           {students.page > 1 ? (
             <Link
-              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-accent"
+              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-muted"
               href={studentsPageHref(query, students.page - 1)}
             >
               Previous
@@ -205,7 +236,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
           )}
           {students.page < students.pageCount ? (
             <Link
-              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-accent"
+              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-muted"
               href={studentsPageHref(query, students.page + 1)}
             >
               Next

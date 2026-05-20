@@ -1,12 +1,7 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { FormActions, FormSection } from "@/components/forms/form-section";
 import { Input } from "@/components/ui/input";
+import { SectionCard } from "@/components/ui/section-card";
 import type { Database, Json } from "@/types/database.types";
 import {
   assignStudentBedAction,
@@ -41,7 +36,7 @@ type StudentFormProps = {
 };
 
 const selectClassName =
-  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  "erp-control w-full";
 
 function FieldLabel({ children }: { children: string }) {
   return (
@@ -74,142 +69,139 @@ export function StudentForm({
 
   return (
     <div className="space-y-6">
-      <form
-        action={action}
-        className="grid gap-5 rounded-lg border border-border bg-card p-5 text-card-foreground shadow-sm md:grid-cols-2"
-      >
+      <form action={action} className="space-y-5">
         <input name="organizationId" type="hidden" value={organizationId} />
         {student ? <input name="studentId" type="hidden" value={student.id} /> : null}
-        <label className="space-y-2">
-          <FieldLabel>First name</FieldLabel>
-          <Input
-            defaultValue={student?.first_name}
-            name="firstName"
-            required
-          />
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Last name</FieldLabel>
-          <Input
-            defaultValue={student?.last_name}
-            name="lastName"
-            required
-          />
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Hostel branch</FieldLabel>
-          <select
-            className={selectClassName}
-            defaultValue={selectedBranchId}
-            name="hostelBranchId"
-            required
-          >
-            {branches.map((branch) => (
-              <option key={branch.id} value={branch.id}>
-                {branch.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="space-y-2" id="status">
-          <FieldLabel>Status</FieldLabel>
-          <select
-            className={selectClassName}
-            defaultValue={student?.status ?? "active"}
-            name="status"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Email</FieldLabel>
-          <Input
-            defaultValue={student?.email ?? ""}
-            name="email"
-            type="email"
-          />
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Phone</FieldLabel>
-          <Input
-            defaultValue={student?.phone ?? ""}
-            name="phone"
-          />
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Date of birth</FieldLabel>
-          <Input
-            defaultValue={student?.date_of_birth ?? ""}
-            name="dateOfBirth"
-            type="date"
-          />
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Admission date</FieldLabel>
-          <Input
-            defaultValue={
-              student?.admission_date ?? new Date().toISOString().slice(0, 10)
-            }
-            name="admissionDate"
-            required
-            type="date"
-          />
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Gender</FieldLabel>
-          <select
-            className={selectClassName}
-            defaultValue={student?.gender ?? ""}
-            name="gender"
-          >
-            <option value="">Not specified</option>
-            <option value="female">Female</option>
-            <option value="male">Male</option>
-            <option value="non_binary">Non binary</option>
-            <option value="prefer_not_to_say">Prefer not to say</option>
-          </select>
-        </label>
-        <div className="hidden md:block" />
-        <label className="space-y-2">
-          <FieldLabel>Guardian name</FieldLabel>
-          <Input
-            defaultValue={readJsonValue(student?.guardian_info ?? {}, "name")}
-            name="guardianName"
-          />
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Guardian phone</FieldLabel>
-          <Input
-            defaultValue={readJsonValue(student?.guardian_info ?? {}, "phone")}
-            name="guardianPhone"
-          />
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Guardian email</FieldLabel>
-          <Input
-            defaultValue={readJsonValue(student?.guardian_info ?? {}, "email")}
-            name="guardianEmail"
-            type="email"
-          />
-        </label>
-        <div className="hidden md:block" />
-        <label className="space-y-2">
-          <FieldLabel>Emergency contact</FieldLabel>
-          <Input
-            defaultValue={readJsonValue(student?.emergency_contact ?? {}, "name")}
-            name="emergencyContactName"
-          />
-        </label>
-        <label className="space-y-2">
-          <FieldLabel>Emergency phone</FieldLabel>
-          <Input
-            defaultValue={readJsonValue(student?.emergency_contact ?? {}, "phone")}
-            name="emergencyContactPhone"
-          />
-        </label>
+
+        <FormSection
+          description="Core admission details used across room allocation, billing, attendance, and student portal access."
+          id="status"
+          title="Student identity"
+        >
+          <label className="space-y-2">
+            <FieldLabel>First name</FieldLabel>
+            <Input defaultValue={student?.first_name} name="firstName" required />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Last name</FieldLabel>
+            <Input defaultValue={student?.last_name} name="lastName" required />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Hostel branch</FieldLabel>
+            <select
+              className={selectClassName}
+              defaultValue={selectedBranchId}
+              name="hostelBranchId"
+              required
+            >
+              {branches.map((branch) => (
+                <option key={branch.id} value={branch.id}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Status</FieldLabel>
+            <select
+              className={selectClassName}
+              defaultValue={student?.status ?? "active"}
+              name="status"
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Email</FieldLabel>
+            <Input defaultValue={student?.email ?? ""} name="email" type="email" />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Phone</FieldLabel>
+            <Input defaultValue={student?.phone ?? ""} name="phone" />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Date of birth</FieldLabel>
+            <Input
+              defaultValue={student?.date_of_birth ?? ""}
+              name="dateOfBirth"
+              type="date"
+            />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Admission date</FieldLabel>
+            <Input
+              defaultValue={
+                student?.admission_date ?? new Date().toISOString().slice(0, 10)
+              }
+              name="admissionDate"
+              required
+              type="date"
+            />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Gender</FieldLabel>
+            <select
+              className={selectClassName}
+              defaultValue={student?.gender ?? ""}
+              name="gender"
+            >
+              <option value="">Not specified</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+              <option value="non_binary">Non binary</option>
+              <option value="prefer_not_to_say">Prefer not to say</option>
+            </select>
+          </label>
+        </FormSection>
+
+        <FormSection
+          description="Guardian and emergency details help staff respond quickly during daily hostel operations."
+          title="Guardian and emergency contacts"
+        >
+          <label className="space-y-2">
+            <FieldLabel>Guardian name</FieldLabel>
+            <Input
+              defaultValue={readJsonValue(student?.guardian_info ?? {}, "name")}
+              name="guardianName"
+            />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Guardian phone</FieldLabel>
+            <Input
+              defaultValue={readJsonValue(student?.guardian_info ?? {}, "phone")}
+              name="guardianPhone"
+            />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Guardian email</FieldLabel>
+            <Input
+              defaultValue={readJsonValue(student?.guardian_info ?? {}, "email")}
+              name="guardianEmail"
+              type="email"
+            />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Emergency contact</FieldLabel>
+            <Input
+              defaultValue={readJsonValue(student?.emergency_contact ?? {}, "name")}
+              name="emergencyContactName"
+            />
+          </label>
+          <label className="space-y-2">
+            <FieldLabel>Emergency phone</FieldLabel>
+            <Input
+              defaultValue={readJsonValue(student?.emergency_contact ?? {}, "phone")}
+              name="emergencyContactPhone"
+            />
+          </label>
+        </FormSection>
+
         {!isEditing ? (
-          <>
+          <FormSection
+            description="Assignment is optional during admission; admins can assign or move beds later from the student profile."
+            title="Initial room assignment"
+          >
             <label className="space-y-2">
               <FieldLabel>Room</FieldLabel>
               <select
@@ -238,24 +230,22 @@ export function StudentForm({
                 ))}
               </select>
             </label>
-          </>
+          </FormSection>
         ) : null}
-        <div className="md:col-span-2">
+
+        <FormActions>
           <Button type="submit">
             {isEditing ? "Save student" : "Create student"}
           </Button>
-        </div>
+        </FormActions>
       </form>
       {student ? (
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card id="assign-bed">
-            <CardHeader>
-              <CardTitle>Assign room and bed</CardTitle>
-              <CardDescription>
-                Move the student into an available bed in their branch.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <SectionCard
+            description="Move the student into an available bed in their branch."
+            id="assign-bed"
+            title="Assign room and bed"
+          >
               <form action={assignStudentBedAction} className="space-y-4">
                 <input name="studentId" type="hidden" value={student.id} />
                 <input name="organizationId" type="hidden" value={organizationId} />
@@ -288,16 +278,11 @@ export function StudentForm({
                   Assign bed
                 </Button>
               </form>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Archive student</CardTitle>
-              <CardDescription>
-                Soft delete keeps audit and billing history intact.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          </SectionCard>
+          <SectionCard
+            description="Soft delete keeps audit and billing history intact."
+            title="Archive student"
+          >
               <form action={softDeleteStudentAction} className="space-y-4">
                 <input name="studentId" type="hidden" value={student.id} />
                 <input name="organizationId" type="hidden" value={organizationId} />
@@ -310,8 +295,7 @@ export function StudentForm({
                   Soft delete
                 </Button>
               </form>
-            </CardContent>
-          </Card>
+          </SectionCard>
         </div>
       ) : null}
     </div>

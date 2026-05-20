@@ -6,6 +6,7 @@ type FormSectionProps = {
   children: ReactNode;
   className?: string;
   description?: ReactNode;
+  id?: string;
   title: string;
 };
 
@@ -13,6 +14,7 @@ export function FormSection({
   children,
   className,
   description,
+  id,
   title,
 }: FormSectionProps) {
   return (
@@ -21,6 +23,7 @@ export function FormSection({
         "rounded-lg border border-border bg-card p-5 text-card-foreground shadow-sm",
         className,
       )}
+      id={id}
     >
       <div className="mb-5 max-w-2xl">
         <h2 className="text-base font-semibold">{title}</h2>

@@ -1,7 +1,8 @@
 import { PricingCards } from "@/components/marketing/pricing-cards";
-import { publicContent } from "@/config/public-content";
+import { getTenantCMS } from "@/lib/tenant/cms";
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const { publicContent } = await getTenantCMS();
   return (
     <div className="pt-24 pb-16 bg-slate-50 dark:bg-slate-900/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center pt-16 pb-8">

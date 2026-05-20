@@ -2,10 +2,12 @@ import type { Route } from "next";
 import Link from "next/link";
 import { BedDouble, DoorOpen, IndianRupee, Wrench } from "lucide-react";
 
+import { ErpPage, ErpPageGrid } from "@/components/layout/erp-page";
 import { BedGrid } from "@/components/rooms/bed-grid";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { getRoom } from "@/modules/rooms/rooms.service";
 
@@ -32,7 +34,7 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
   const details = await getRoom(roomId);
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <Button asChild variant="outline">
@@ -41,9 +43,10 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
         }
         description="Review bed inventory, occupancy, status changes, and student transfer actions."
         eyebrow={details.room.room_code}
+        meta={<StatusBadge status={details.room.status} />}
         title={details.room.name}
       />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <ErpPageGrid>
         <StatCard
           icon={DoorOpen}
           label="Room type"
@@ -71,7 +74,7 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
             details.room.currency_code,
           )}
         />
-      </div>
+      </ErpPageGrid>
       <BedGrid
         availableBeds={details.availableBeds}
         beds={details.beds}
@@ -79,6 +82,6 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
         occupancy={details.occupancy}
         room={details.room}
       />
-    </section>
+    </ErpPage>
   );
 }

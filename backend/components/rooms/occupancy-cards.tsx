@@ -1,5 +1,7 @@
 import { BedDouble, DoorOpen, Gauge, Hotel } from "lucide-react";
 
+import { ErpPageGrid } from "@/components/layout/erp-page";
+import { SectionCard } from "@/components/ui/section-card";
 import { StatCard } from "@/components/ui/stat-card";
 
 type OccupancyTotals = {
@@ -39,7 +41,8 @@ export function OccupancyCards({ totals }: OccupancyCardsProps) {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-4">
+    <div className="space-y-4">
+      <ErpPageGrid>
       <StatCard icon={Hotel} label="Rooms" value={String(totals.rooms)} />
       <StatCard
         description={`${totals.occupiedBeds} occupied`}
@@ -59,7 +62,11 @@ export function OccupancyCards({ totals }: OccupancyCardsProps) {
         tone={totals.occupancyRate >= 90 ? "warning" : "info"}
         value={`${totals.occupancyRate}%`}
       />
-      <div className="rounded-lg border border-border bg-card p-4 text-card-foreground shadow-sm md:col-span-4">
+      </ErpPageGrid>
+      <SectionCard
+        description="Occupied, vacant, and unavailable bed mix across the current room list."
+        title="Occupancy distribution"
+      >
         <div className="h-3 overflow-hidden rounded bg-muted">
           <div className="flex h-full">
             {segments.map((segment) => (
@@ -79,7 +86,7 @@ export function OccupancyCards({ totals }: OccupancyCardsProps) {
             </span>
           ))}
         </div>
-      </div>
+      </SectionCard>
     </div>
   );
 }

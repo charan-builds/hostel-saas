@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { FormActions } from "@/components/forms/form-section";
+import { ErpPage } from "@/components/layout/erp-page";
 import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import {
   createHostelBranchAction,
@@ -9,9 +12,7 @@ import {
 import { getRoomFormOptions } from "@/modules/rooms/rooms.service";
 
 const fieldClassName =
-  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2";
-
-const formClassName = "grid gap-4 rounded-lg border border-border bg-card p-6 shadow-sm";
+  "erp-control w-full";
 
 export default async function RoomSettingsPage() {
   await requireTenantPageAccess({
@@ -22,59 +23,66 @@ export default async function RoomSettingsPage() {
   const selectedBranchId = options.branches[0]?.id ?? "";
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         description="Create branches, floors, and reusable room templates for dynamic hostel operations."
         eyebrow="Rooms and beds"
         title="Configuration"
       />
       <div className="grid gap-6 lg:grid-cols-3">
-        <form action={createHostelBranchAction} className={formClassName}>
+        <SectionCard
+          description="Branches define separate hostel locations under the same tenant."
+          title="Create branch"
+        >
+          <form action={createHostelBranchAction} className="space-y-4">
+            <input name="organizationId" type="hidden" value={options.organizationId} />
+            <label className="space-y-1">
+              <span className="text-sm font-medium">Branch name</span>
+              <input
+                className={fieldClassName}
+                name="name"
+                required
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-sm font-medium">Slug</span>
+              <input
+                className={fieldClassName}
+                name="slug"
+                required
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-sm font-medium">Timezone</span>
+              <input
+                className={fieldClassName}
+                defaultValue="UTC"
+                name="timezone"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-sm font-medium">Status</span>
+              <select
+                className={fieldClassName}
+                defaultValue="active"
+                name="status"
+              >
+                <option value="active">active</option>
+                <option value="suspended">suspended</option>
+                <option value="archived">archived</option>
+              </select>
+            </label>
+            <FormActions className="static mx-0 border-0 bg-transparent p-0">
+              <Button type="submit">Create branch</Button>
+            </FormActions>
+          </form>
+        </SectionCard>
+        <SectionCard
+          description="Floors help admins understand rooms spatially by branch."
+          title="Create floor"
+        >
+        <form action={createHostelFloorAction} className="space-y-4">
           <input name="organizationId" type="hidden" value={options.organizationId} />
-          <h3 className="font-semibold">Create branch</h3>
-          <label className="space-y-1">
-            <span className="text-sm font-medium">Branch name</span>
-            <input
-              className={fieldClassName}
-              name="name"
-              required
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-sm font-medium">Slug</span>
-            <input
-              className={fieldClassName}
-              name="slug"
-              required
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-sm font-medium">Timezone</span>
-            <input
-              className={fieldClassName}
-              defaultValue="UTC"
-              name="timezone"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-sm font-medium">Status</span>
-            <select
-              className={fieldClassName}
-              defaultValue="active"
-              name="status"
-            >
-              <option value="active">active</option>
-              <option value="suspended">suspended</option>
-              <option value="archived">archived</option>
-            </select>
-          </label>
-          <Button type="submit">
-            Create branch
-          </Button>
-        </form>
-        <form action={createHostelFloorAction} className={formClassName}>
-          <input name="organizationId" type="hidden" value={options.organizationId} />
-          <h3 className="font-semibold">Create floor</h3>
           <label className="space-y-1">
             <span className="text-sm font-medium">Branch</span>
             <select
@@ -128,13 +136,17 @@ export default async function RoomSettingsPage() {
               <option value="inactive">inactive</option>
             </select>
           </label>
-          <Button type="submit">
-            Create floor
-          </Button>
+          <FormActions className="static mx-0 border-0 bg-transparent p-0">
+            <Button type="submit">Create floor</Button>
+          </FormActions>
         </form>
-        <form action={createRoomTemplateAction} className={formClassName}>
+        </SectionCard>
+        <SectionCard
+          description="Templates speed up room creation and standardize bed labels, capacity, and pricing."
+          title="Create room template"
+        >
+        <form action={createRoomTemplateAction} className="space-y-4">
           <input name="organizationId" type="hidden" value={options.organizationId} />
-          <h3 className="font-semibold">Create room template</h3>
           <label className="space-y-1">
             <span className="text-sm font-medium">Branch</span>
             <select
@@ -222,11 +234,12 @@ export default async function RoomSettingsPage() {
               name="bedLabelPattern"
             />
           </label>
-          <Button type="submit">
-            Create template
-          </Button>
+          <FormActions className="static mx-0 border-0 bg-transparent p-0">
+            <Button type="submit">Create template</Button>
+          </FormActions>
         </form>
+        </SectionCard>
       </div>
-    </section>
+    </ErpPage>
   );
 }

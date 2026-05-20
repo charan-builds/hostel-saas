@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ErpPage } from "@/components/layout/erp-page";
 import { StudentDocumentUploadForm } from "@/components/students/student-document-upload-form";
 import { StudentForm } from "@/components/students/student-form";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ export default async function EditStudentPage({ params }: EditStudentPageProps) 
   ]);
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <>
@@ -53,6 +54,6 @@ export default async function EditStudentPage({ params }: EditStudentPageProps) 
       <div id="documents">
         <StudentDocumentUploadForm studentId={student.id} />
       </div>
-    </section>
+    </ErpPage>
   );
 }

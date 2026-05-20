@@ -1,4 +1,5 @@
 import { RoomForm } from "@/components/rooms/room-form";
+import { ErpPage } from "@/components/layout/erp-page";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { getRoom, getRoomFormOptions } from "@/modules/rooms/rooms.service";
@@ -19,7 +20,7 @@ export default async function EditRoomPage({ params }: EditRoomPageProps) {
   const options = await getRoomFormOptions(roomDetails.room.hostel_branch_id);
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         description="Adjust room metadata, capacity, pricing, and operational status."
         eyebrow={roomDetails.room.room_code}
@@ -33,6 +34,6 @@ export default async function EditRoomPage({ params }: EditRoomPageProps) {
         room={roomDetails.room}
         templates={options.templates}
       />
-    </section>
+    </ErpPage>
   );
 }

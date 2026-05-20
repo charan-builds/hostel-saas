@@ -3,14 +3,8 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { SectionCard } from "@/components/ui/section-card";
 import {
   addInvoiceAdjustmentAction,
   voidBillingInvoiceAction,
@@ -22,7 +16,7 @@ type AdjustmentFormProps = {
 };
 
 const selectClassName =
-  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  "erp-control w-full";
 
 export function AdjustmentForm({ invoice }: AdjustmentFormProps) {
   const canAdjust = invoice.status !== "void";
@@ -34,14 +28,10 @@ export function AdjustmentForm({ invoice }: AdjustmentFormProps) {
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Adjust invoice</CardTitle>
-          <CardDescription>
-            Add penalties, fines, discounts, or manual corrections.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <SectionCard
+        description="Add penalties, fines, discounts, or manual corrections."
+        title="Adjust invoice"
+      >
           <form action={addInvoiceAdjustmentAction} className="space-y-4">
             <input name="invoiceId" type="hidden" value={invoice.id} />
             <label className="block space-y-2">
@@ -86,16 +76,12 @@ export function AdjustmentForm({ invoice }: AdjustmentFormProps) {
               Apply adjustment
             </Button>
           </form>
-        </CardContent>
-      </Card>
-      <Card className="border-destructive/30">
-        <CardHeader>
-          <CardTitle className="text-destructive">Void invoice</CardTitle>
-          <CardDescription>
-            Only unpaid invoices can be voided.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      </SectionCard>
+      <SectionCard
+        className="border-destructive/30"
+        description="Only unpaid invoices can be voided."
+        title="Void invoice"
+      >
           <form action={voidBillingInvoiceAction} className="space-y-4">
             <input name="invoiceId" type="hidden" value={invoice.id} />
             <label className="block space-y-2">
@@ -106,8 +92,7 @@ export function AdjustmentForm({ invoice }: AdjustmentFormProps) {
               Void invoice
             </Button>
           </form>
-        </CardContent>
-      </Card>
+      </SectionCard>
     </div>
   );
 }

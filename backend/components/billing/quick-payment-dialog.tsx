@@ -25,7 +25,7 @@ type PaymentCollectionFormProps = {
 };
 
 const selectClassName =
-  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  "erp-control w-full";
 
 const textAreaClassName =
   "min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
@@ -53,6 +53,7 @@ export function PaymentCollectionForm({
   const amountCents = Math.round(Number(amount || 0) * 100);
   const amountValid =
     Number.isFinite(amountCents) && amountCents > 0 && amountCents <= invoice.balanceCents;
+  const remainingAfterPayment = amountValid ? invoice.balanceCents - amountCents : invoice.balanceCents;
 
   return (
     <form
@@ -67,7 +68,7 @@ export function PaymentCollectionForm({
       <input name="invoiceId" type="hidden" value={invoice.id} />
       <input name="idempotencyKey" ref={idempotencyKeyRef} type="hidden" />
       <input name="amountCents" type="hidden" value={amountValid ? amountCents : 0} />
-      <div className="rounded-md border border-border bg-muted/40 p-3 text-sm">
+      <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-medium">{invoice.invoiceNumber}</p>
@@ -76,6 +77,20 @@ export function PaymentCollectionForm({
           <p className="shrink-0 font-semibold">
             {formatCurrency(invoice.balanceCents, invoice.currencyCode)}
           </p>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 rounded-md bg-background/70 p-2">
+          <div>
+            <p className="text-xs text-muted-foreground">Recording now</p>
+            <p className="font-semibold">
+              {formatCurrency(amountValid ? amountCents : 0, invoice.currencyCode)}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">Remaining</p>
+            <p className="font-semibold">
+              {formatCurrency(remainingAfterPayment, invoice.currencyCode)}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -131,12 +146,17 @@ export function PaymentCollectionForm({
       </label>
 
       {!amountValid && canPay ? (
-        <p className="text-sm font-medium text-destructive">
+        <p aria-live="polite" className="text-sm font-medium text-destructive">
           Enter an amount up to the outstanding balance.
         </p>
       ) : null}
+      {!canPay ? (
+        <p className="rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+          This invoice is not currently payable.
+        </p>
+      ) : null}
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
         {onCancel ? (
           <Button onClick={onCancel} type="button" variant="outline">
             Cancel

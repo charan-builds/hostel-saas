@@ -1,11 +1,5 @@
 import { PaymentCollectionForm } from "@/components/billing/quick-payment-dialog";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { SectionCard } from "@/components/ui/section-card";
 import type { BillingInvoice } from "@/modules/billing/billing.service";
 
 type PaymentFormProps = {
@@ -15,14 +9,10 @@ type PaymentFormProps = {
 
 export function PaymentForm({ invoice, studentLabel = "Selected invoice" }: PaymentFormProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Record payment</CardTitle>
-        <CardDescription>
-          Partial and full payments use the protected idempotent payment workflow.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <SectionCard
+      description="Partial and full payments use the protected idempotent payment workflow."
+      title="Record payment"
+    >
         <PaymentCollectionForm
           invoice={{
             balanceCents: invoice.balance_cents,
@@ -34,7 +24,6 @@ export function PaymentForm({ invoice, studentLabel = "Selected invoice" }: Paym
           }}
           submitLabel="Record payment"
         />
-      </CardContent>
-    </Card>
+    </SectionCard>
   );
 }

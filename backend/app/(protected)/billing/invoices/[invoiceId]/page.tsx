@@ -5,17 +5,12 @@ import { CalendarClock, ReceiptText, WalletCards } from "lucide-react";
 import { AdjustmentForm } from "@/components/billing/adjustment-form";
 import { PaymentForm } from "@/components/billing/payment-form";
 import { ReceiptList } from "@/components/billing/receipt-list";
+import { ErpPage, ErpPageGrid } from "@/components/layout/erp-page";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { SectionCard } from "@/components/ui/section-card";
 import { StatCard } from "@/components/ui/stat-card";
-import { StatusChip } from "@/components/ui/status-chip";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { getInvoice } from "@/modules/billing/billing.service";
 import { formatCurrency } from "@/lib/utils";
@@ -51,7 +46,7 @@ export default async function InvoiceDetailPage({
       : 0;
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <>
@@ -67,11 +62,11 @@ export default async function InvoiceDetailPage({
         }
         description={`${studentLabel} · due ${formatDate(details.invoice.due_date)}`}
         eyebrow={details.invoice.invoice_number}
-        meta={<StatusChip status={details.invoice.status} />}
+        meta={<StatusBadge status={details.invoice.status} />}
         title="Invoice details"
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <ErpPageGrid>
         <StatCard
           description={`${paymentProgress}% paid`}
           icon={ReceiptText}
@@ -99,21 +94,17 @@ export default async function InvoiceDetailPage({
           tone={details.invoice.status === "overdue" ? "danger" : "default"}
           value={formatDate(details.invoice.due_date)}
         />
-      </div>
+      </ErpPageGrid>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Invoice items</CardTitle>
-              <CardDescription>
-                Rent, penalties, discounts, and manual adjustments.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          <SectionCard
+            description="Rent, penalties, discounts, and manual adjustments."
+            title="Invoice items"
+          >
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[520px] border-collapse text-left text-sm">
-                  <thead className="border-b border-border text-muted-foreground">
+                  <thead className="border-b border-border bg-muted/60 text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-medium">Item</th>
                       <th className="px-3 py-2 font-medium">Type</th>
@@ -138,8 +129,7 @@ export default async function InvoiceDetailPage({
                   </tbody>
                 </table>
               </div>
-            </CardContent>
-          </Card>
+          </SectionCard>
           <ReceiptList payments={details.payments} receipts={details.receipts} />
         </div>
         <div className="space-y-6">
@@ -147,6 +137,6 @@ export default async function InvoiceDetailPage({
           <AdjustmentForm invoice={details.invoice} />
         </div>
       </div>
-    </section>
+    </ErpPage>
   );
 }

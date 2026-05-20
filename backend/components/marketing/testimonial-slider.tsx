@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
-import { publicContent } from "@/config/public-content";
+import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import { OptimizedImage } from "@/components/marketing/shared/optimized-image";
+import { useTenantCMS } from "@/components/providers/tenant-provider";
+import { AnimatedReveal } from "@/components/marketing/foundation/AnimatedReveal";
 
 export function TestimonialSlider() {
+  const { publicContent } = useTenantCMS();
   const [currentIndex, setCurrentIndex] = useState(0);
   const testimonials = publicContent.testimonials;
 

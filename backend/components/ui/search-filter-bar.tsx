@@ -11,6 +11,7 @@ type SearchFilterBarProps = {
   defaultValue?: string;
   name?: string;
   placeholder?: string;
+  surface?: "card" | "embedded";
 };
 
 export function SearchFilterBar({
@@ -20,11 +21,15 @@ export function SearchFilterBar({
   defaultValue,
   name = "q",
   placeholder = "Search",
+  surface = "card",
 }: SearchFilterBarProps) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-lg border border-border bg-card p-3 text-card-foreground shadow-[var(--erp-shadow-card)] sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-3 text-card-foreground sm:flex-row sm:items-center sm:justify-between",
+        surface === "card"
+          ? "rounded-lg border border-border bg-card p-3 shadow-[var(--erp-shadow-card)]"
+          : "rounded-md bg-transparent",
         className,
       )}
       role="search"

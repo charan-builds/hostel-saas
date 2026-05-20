@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { websiteConfig } from "@/config/website-config";
+import { useTenantCMS } from "@/components/providers/tenant-provider";
 import { NavLink } from "./NavLink";
 import { NavbarActions } from "./NavbarActions";
 
@@ -10,6 +10,7 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, onClose, isLoggedIn }: MobileMenuProps) {
+  const { websiteConfig } = useTenantCMS();
   return (
     <AnimatePresence>
       {isOpen && (

@@ -25,11 +25,14 @@ type DataTableProps<TData, TValue> = {
   data: TData[];
   emptyDescription?: string;
   emptyTitle?: string;
+  enablePagination?: boolean;
   filterPlaceholder?: string;
   mobileCard?: (row: TData, index: number) => ReactNode;
   pageSize?: number;
   rowSelection?: boolean;
   searchKey?: string;
+  showToolbar?: boolean;
+  tableMinWidth?: string;
 };
 
 export function createSelectionColumn<TData>(): ColumnDef<TData> {
@@ -64,11 +67,14 @@ export function DataTable<TData, TValue>({
   data,
   emptyDescription = "Try adjusting filters or adding a new record.",
   emptyTitle = "No records found",
+  enablePagination = true,
   filterPlaceholder = "Search records",
   mobileCard,
   pageSize = 10,
   rowSelection: enableRowSelection = true,
   searchKey,
+  showToolbar = true,
+  tableMinWidth = "720px",
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -81,7 +87,7 @@ export function DataTable<TData, TValue>({
     enableRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(enablePagination ? { getPaginationRowModel: getPaginationRowModel() } : {}),
     getSortedRowModel: getSortedRowModel(),
     initialState: {
       pagination: {
@@ -103,31 +109,30 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label
-          className="relative block w-full sm:max-w-xs"
-          htmlFor={searchId}
-        >
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <Input
-            className="pl-9"
-            id={searchId}
-            onChange={(event) => setGlobalFilter(event.target.value)}
-            placeholder={filterPlaceholder}
-            value={globalFilter}
-          />
-        </label>
-        <div className="flex flex-wrap items-center gap-2">
-          {selectedCount > 0 && bulkActions ? bulkActions : null}
-          <p className="text-sm text-muted-foreground">
-            {selectedCount > 0 ? `${selectedCount} selected · ` : ""}
-            {rowCount} rows
-          </p>
+      {showToolbar ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <label className="relative block w-full sm:max-w-xs" htmlFor={searchId}>
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <Input
+              className="pl-9"
+              id={searchId}
+              onChange={(event) => setGlobalFilter(event.target.value)}
+              placeholder={filterPlaceholder}
+              value={globalFilter}
+            />
+          </label>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedCount > 0 && bulkActions ? bulkActions : null}
+            <p className="text-sm text-muted-foreground">
+              {selectedCount > 0 ? `${selectedCount} selected · ` : ""}
+              {rowCount} rows
+            </p>
+          </div>
         </div>
-      </div>
+      ) : null}
       <div className="overflow-hidden rounded-lg border border-border bg-card">
         {mobileCard ? (
           <div className="divide-y divide-border md:hidden">
@@ -143,7 +148,10 @@ export function DataTable<TData, TValue>({
           </div>
         ) : null}
         <div className={mobileCard ? "hidden overflow-x-auto md:block" : "overflow-x-auto"}>
-          <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+          <table
+            className="w-full border-collapse text-left text-sm"
+            style={{ minWidth: tableMinWidth }}
+          >
             <thead className="sticky top-0 z-10 bg-muted/85 text-muted-foreground backdrop-blur">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
@@ -203,32 +211,34 @@ export function DataTable<TData, TValue>({
           </table>
         </div>
       </div>
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {Math.max(1, table.getPageCount())}
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            disabled={!table.getCanPreviousPage()}
-            onClick={() => table.previousPage()}
-            size="sm"
-            variant="outline"
-          >
-            <ChevronLeft aria-hidden="true" />
-            Previous
-          </Button>
-          <Button
-            disabled={!table.getCanNextPage()}
-            onClick={() => table.nextPage()}
-            size="sm"
-            variant="outline"
-          >
-            Next
-            <ChevronRight aria-hidden="true" />
-          </Button>
+      {enablePagination ? (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {Math.max(1, table.getPageCount())}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              disabled={!table.getCanPreviousPage()}
+              onClick={() => table.previousPage()}
+              size="sm"
+              variant="outline"
+            >
+              <ChevronLeft aria-hidden="true" />
+              Previous
+            </Button>
+            <Button
+              disabled={!table.getCanNextPage()}
+              onClick={() => table.nextPage()}
+              size="sm"
+              variant="outline"
+            >
+              Next
+              <ChevronRight aria-hidden="true" />
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

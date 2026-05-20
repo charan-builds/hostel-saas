@@ -6,15 +6,10 @@ import { ErpPage, ErpPageGrid } from "@/components/layout/erp-page";
 import { InvoiceTable } from "@/components/billing/invoice-table";
 import { RevenueCards } from "@/components/billing/revenue-cards";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ActionToolbar } from "@/components/ui/action-toolbar";
 import { PageHeader } from "@/components/ui/page-header";
 import { SearchFilterBar } from "@/components/ui/search-filter-bar";
+import { SectionCard } from "@/components/ui/section-card";
 import { StatCard } from "@/components/ui/stat-card";
 import { requireTenantPageAccess } from "@/lib/auth/page-guards";
 import { validateInput } from "@/lib/validation/zod";
@@ -93,6 +88,14 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
     { label: "Overdue", status: "overdue" },
     { label: "Paid", status: "paid" },
   ];
+  const branchById = new Map(options.branches.map((branch) => [branch.id, branch.name]));
+  const activeFilters = [
+    query.q ? `Search: ${query.q}` : undefined,
+    query.hostelBranchId
+      ? `Branch: ${branchById.get(query.hostelBranchId) ?? "Selected branch"}`
+      : undefined,
+    query.status ? `Status: ${query.status.replaceAll("_", " ")}` : undefined,
+  ].filter((value): value is string => Boolean(value));
 
   return (
     <ErpPage>
@@ -141,79 +144,105 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
         />
       </ErpPageGrid>
 
-      <div className="flex flex-wrap gap-2">
-        {quickFilters.map((filter) => (
-          <Button
-            asChild
-            key={filter.label}
-            size="sm"
-            variant={(query.status ?? null) === filter.status ? "default" : "outline"}
-          >
-            <Link href={billingHref(query, { status: filter.status })}>
-              {filter.label}
-            </Link>
-          </Button>
-        ))}
-      </div>
+      <ActionToolbar
+        description="Use these shortcuts for the daily collection queue."
+        title="Collection views"
+      >
+        <div className="flex flex-wrap gap-2">
+          {quickFilters.map((filter) => (
+            <Button
+              asChild
+              key={filter.label}
+              size="sm"
+              variant={(query.status ?? null) === filter.status ? "default" : "outline"}
+            >
+              <Link href={billingHref(query, { status: filter.status })}>
+                {filter.label}
+              </Link>
+            </Button>
+          ))}
+        </div>
+      </ActionToolbar>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_380px]">
-        <form action="/billing">
-          <SearchFilterBar
-            actions={
-              <Button type="submit" variant="outline">
-                Apply filters
-              </Button>
-            }
-            defaultValue={query.q ?? ""}
-            placeholder="Search invoice or student"
-          >
-            <select
-              aria-label="Filter by branch"
-              className={selectClassName}
-              defaultValue={query.hostelBranchId ?? ""}
-              name="hostelBranchId"
+        <SectionCard
+          contentClassName="space-y-4"
+          description="Find invoices by student, branch, status, or page size."
+          title="Invoice search"
+        >
+          <form action="/billing">
+            <SearchFilterBar
+              actions={
+                <>
+                  <Button type="submit" variant="outline">
+                    Apply filters
+                  </Button>
+                  <Button asChild variant="ghost">
+                    <Link href="/billing">Reset</Link>
+                  </Button>
+                </>
+              }
+              defaultValue={query.q ?? ""}
+              placeholder="Search invoice or student"
+              surface="embedded"
             >
-              <option value="">All branches</option>
-              {options.branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
+              <select
+                aria-label="Filter by branch"
+                className={selectClassName}
+                defaultValue={query.hostelBranchId ?? ""}
+                name="hostelBranchId"
+              >
+                <option value="">All branches</option>
+                {options.branches.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                aria-label="Filter by invoice status"
+                className={selectClassName}
+                defaultValue={query.status ?? ""}
+                name="status"
+              >
+                <option value="">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="partially_paid">Partially paid</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+                <option value="void">Void</option>
+              </select>
+              <select
+                aria-label="Rows per page"
+                className={selectClassName}
+                defaultValue={String(query.limit)}
+                name="limit"
+              >
+                <option value="10">10 rows</option>
+                <option value="20">20 rows</option>
+                <option value="50">50 rows</option>
+                <option value="100">100 rows</option>
+              </select>
+            </SearchFilterBar>
+          </form>
+          {activeFilters.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Active filters</span>
+              {activeFilters.map((filter) => (
+                <span
+                  className="rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-medium capitalize"
+                  key={filter}
+                >
+                  {filter}
+                </span>
               ))}
-            </select>
-            <select
-              aria-label="Filter by invoice status"
-              className={selectClassName}
-              defaultValue={query.status ?? ""}
-              name="status"
-            >
-              <option value="">All statuses</option>
-              <option value="pending">Pending</option>
-              <option value="partially_paid">Partially paid</option>
-              <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
-              <option value="void">Void</option>
-            </select>
-            <select
-              aria-label="Rows per page"
-              className={selectClassName}
-              defaultValue={String(query.limit)}
-              name="limit"
-            >
-              <option value="10">10 rows</option>
-              <option value="20">20 rows</option>
-              <option value="50">50 rows</option>
-              <option value="100">100 rows</option>
-            </select>
-          </SearchFilterBar>
-        </form>
-        <Card>
-          <CardHeader>
-            <CardTitle>Generate monthly invoices</CardTitle>
-            <CardDescription>
-              Branch-scoped generation prevents duplicate billing cycles.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </div>
+          ) : null}
+        </SectionCard>
+        <SectionCard
+          description="Branch-scoped generation prevents duplicate billing cycles."
+          title="Generate monthly invoices"
+        >
             <form action={generateMonthlyInvoicesAction} className="space-y-3">
               <input
                 name="organizationId"
@@ -245,10 +274,18 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
                 Run billing
               </Button>
             </form>
-          </CardContent>
-        </Card>
+        </SectionCard>
       </div>
-      <InvoiceTable invoices={invoices.data} />
+      <SectionCard
+        contentClassName="space-y-4"
+        description="Collect rent, inspect overdue invoices, and open receipt history from one queue."
+        title="Invoice collection queue"
+      >
+        <InvoiceTable
+          branchNames={Object.fromEntries(branchById)}
+          invoices={invoices.data}
+        />
+      </SectionCard>
       <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <p>
           Page {invoices.page} of {invoices.pageCount}, {invoices.count} total
@@ -256,7 +293,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
         <nav className="flex items-center gap-2" aria-label="Invoice pagination">
           {invoices.page > 1 ? (
             <Link
-              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-accent"
+              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-muted"
               href={billingHref(query, { page: invoices.page - 1 })}
             >
               Previous
@@ -268,7 +305,7 @@ export default async function BillingPage({ searchParams }: BillingPageProps) {
           )}
           {invoices.page < invoices.pageCount ? (
             <Link
-              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-accent"
+              className="rounded-md border border-border px-3 py-2 font-medium text-foreground hover:bg-muted"
               href={billingHref(query, { page: invoices.page + 1 })}
             >
               Next

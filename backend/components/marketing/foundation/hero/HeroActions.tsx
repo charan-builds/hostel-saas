@@ -2,15 +2,14 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 import type { Route } from "next";
 
 import { PremiumButton } from "../PremiumButton";
-import { websiteConfig } from "@/config/website-config";
+import { useTenantCMS } from "@/components/providers/tenant-provider";
 import { AnimatedReveal } from "../AnimatedReveal";
 
-interface HeroActionsProps {
-  primaryCTA: { text: string; href: string };
-  secondaryCTA: { text: string; href: string };
-}
+export function HeroActions() {
+  const { websiteConfig, publicContent } = useTenantCMS();
+  const primaryCTA = publicContent.hero.primaryCTA;
+  const secondaryCTA = publicContent.hero.secondaryCTA;
 
-export function HeroActions({ primaryCTA, secondaryCTA }: HeroActionsProps) {
   const whatsappHref =
     `https://wa.me/${websiteConfig.contact.whatsapp.replace(/[^0-9]/g, "")}` as const;
 

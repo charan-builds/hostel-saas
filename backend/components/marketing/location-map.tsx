@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { websiteConfig } from "@/config/website-config";
-import { publicContent } from "@/config/public-content";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin, Navigation, Phone, ExternalLink, Clock } from "lucide-react";
+import { useTenantCMS } from "@/components/providers/tenant-provider";
+import { AnimatedReveal } from "@/components/marketing/foundation/AnimatedReveal";
 
 export function LocationMap() {
+  const { websiteConfig, publicContent } = useTenantCMS();
   const { location } = publicContent;
 
   return (

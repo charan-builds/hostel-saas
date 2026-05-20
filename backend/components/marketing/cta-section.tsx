@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { publicContent } from "@/config/public-content";
+import { useTenantCMS } from "@/components/providers/tenant-provider";
 
 export function CTASection() {
+  const { publicContent } = useTenantCMS();
+
   return (
     <section className="relative overflow-hidden py-24">
       {/* Background with primary color and gradient overlay */}

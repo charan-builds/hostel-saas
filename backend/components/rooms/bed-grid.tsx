@@ -1,9 +1,11 @@
 import { BedDouble, CheckCircle, DoorOpen, Gauge } from "lucide-react";
 
+import { ErpPageGrid } from "@/components/layout/erp-page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SectionCard } from "@/components/ui/section-card";
 import { EmptyState } from "@/components/ui/state";
-import { StatusChip } from "@/components/ui/status-chip";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { StatCard } from "@/components/ui/stat-card";
 import type { Database } from "@/types/database.types";
 import type { BedWithOccupant, RoomOccupancy } from "@/modules/rooms/rooms.service";
@@ -30,27 +32,34 @@ type BedGridProps = {
 };
 
 const fieldClassName =
-  "h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2";
+  "erp-control w-full";
 
 function bedStatusClass(status: string) {
   if (status === "occupied") {
-    return "border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950";
+    return "border-success/30 bg-success/10";
   }
 
   if (status === "available") {
-    return "border-sky-300 bg-sky-50 dark:border-sky-900 dark:bg-sky-950";
+    return "border-info/30 bg-info/10";
   }
 
   if (status === "reserved") {
-    return "border-violet-300 bg-violet-50 dark:border-violet-900 dark:bg-violet-950";
+    return "border-primary/30 bg-primary/10";
   }
 
   if (status === "maintenance" || status === "unavailable") {
-    return "border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950";
+    return "border-warning/30 bg-warning/10";
   }
 
   return "border-border bg-card";
 }
+
+const bedLegend = [
+  { className: "bg-info", label: "Vacant" },
+  { className: "bg-success", label: "Occupied" },
+  { className: "bg-primary", label: "Reserved" },
+  { className: "bg-warning", label: "Blocked" },
+];
 
 export function BedGrid({
   availableBeds,
@@ -63,7 +72,7 @@ export function BedGrid({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <ErpPageGrid>
         <StatCard
           icon={BedDouble}
           label="Beds"
@@ -87,51 +96,70 @@ export function BedGrid({
           tone={occupancy.occupancyRate >= 90 ? "warning" : "default"}
           value={`${occupancy.occupancyRate}%`}
         />
-      </div>
-      <form
-        action={createRoomBedAction}
-        className="grid gap-4 rounded-lg border border-border bg-card p-6 shadow-sm md:grid-cols-[1fr_120px_160px_auto]"
+      </ErpPageGrid>
+      <SectionCard
+        actions={
+          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+            {bedLegend.map((item) => (
+              <span className="flex items-center gap-2" key={item.label}>
+                <span className={`size-2.5 rounded-full ${item.className}`} />
+                {item.label}
+              </span>
+            ))}
+          </div>
+        }
+        description="Add beds manually for custom labels or adjust room capacity from the room form."
+        title="Add bed"
       >
-        <input name="roomId" type="hidden" value={room.id} />
-        <input name="organizationId" type="hidden" value={room.organization_id} />
-        <input name="hostelBranchId" type="hidden" value={room.hostel_branch_id} />
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Bed code</span>
-          <input
-            className={fieldClassName}
-            name="bedCode"
-            required
-          />
-        </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Order</span>
-          <input
-            className={fieldClassName}
-            defaultValue={beds.length + 1}
-            min={0}
-            name="sortOrder"
-            type="number"
-          />
-        </label>
-        <label className="space-y-1">
-          <span className="text-sm font-medium">Status</span>
-          <select
-            className={fieldClassName}
-            defaultValue="available"
-            name="status"
-          >
-            <option value="available">available</option>
-            <option value="reserved">reserved</option>
-            <option value="maintenance">maintenance</option>
-            <option value="unavailable">unavailable</option>
-            <option value="inactive">inactive</option>
-          </select>
-        </label>
-        <Button className="self-end" type="submit">
-          Add bed
-        </Button>
-      </form>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <form
+          action={createRoomBedAction}
+          className="grid gap-4 md:grid-cols-[1fr_120px_160px_auto]"
+        >
+          <input name="roomId" type="hidden" value={room.id} />
+          <input name="organizationId" type="hidden" value={room.organization_id} />
+          <input name="hostelBranchId" type="hidden" value={room.hostel_branch_id} />
+          <label className="space-y-1">
+            <span className="text-sm font-medium">Bed code</span>
+            <input
+              className={fieldClassName}
+              name="bedCode"
+              required
+            />
+          </label>
+          <label className="space-y-1">
+            <span className="text-sm font-medium">Order</span>
+            <input
+              className={fieldClassName}
+              defaultValue={beds.length + 1}
+              min={0}
+              name="sortOrder"
+              type="number"
+            />
+          </label>
+          <label className="space-y-1">
+            <span className="text-sm font-medium">Status</span>
+            <select
+              className={fieldClassName}
+              defaultValue="available"
+              name="status"
+            >
+              <option value="available">available</option>
+              <option value="reserved">reserved</option>
+              <option value="maintenance">maintenance</option>
+              <option value="unavailable">unavailable</option>
+              <option value="inactive">inactive</option>
+            </select>
+          </label>
+          <Button className="self-end" type="submit">
+            Add bed
+          </Button>
+        </form>
+      </SectionCard>
+      <SectionCard
+        contentClassName="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+        description="Each tile shows current bed state, occupant, and available operations."
+        title="Bed occupancy map"
+      >
         {beds.length === 0 ? (
           <EmptyState
             description="Add beds manually or adjust room capacity from the room form."
@@ -147,7 +175,7 @@ export function BedGrid({
                 <div>
                   <p className="font-semibold">{bed.bed_code}</p>
                   <div className="mt-1">
-                    <StatusChip status={bed.status} />
+                    <StatusBadge status={bed.status} />
                   </div>
                 </div>
                 <span className="rounded bg-background/80 px-2 py-1 text-xs font-medium">
@@ -155,7 +183,7 @@ export function BedGrid({
                 </span>
               </div>
               {bed.occupant ? (
-                <div className="rounded bg-background/80 p-3 text-sm">
+                <div className="rounded-md border border-border bg-background/80 p-3 text-sm">
                   <p className="font-medium">
                     {bed.occupant.first_name} {bed.occupant.last_name}
                   </p>
@@ -273,7 +301,7 @@ export function BedGrid({
             </div>
           ))
         )}
-      </div>
+      </SectionCard>
     </div>
   );
 }

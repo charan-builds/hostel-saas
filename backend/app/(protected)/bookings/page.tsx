@@ -1,12 +1,28 @@
-import { CalendarCheck, CalendarClock, CheckCircle2, XCircle } from "lucide-react";
+import {
+  CalendarClock,
+  CheckCircle2,
+  Filter,
+  RotateCcw,
+  UsersRound,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import type { Route } from "next";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookingTable } from "@/components/bookings/booking-table";
+import { ErpPage, ErpPageGrid } from "@/components/layout/erp-page";
+import { ActionToolbar } from "@/components/ui/action-toolbar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { PageHeader } from "@/components/ui/page-header";
+import { SearchFilterBar } from "@/components/ui/search-filter-bar";
+import { SectionCard } from "@/components/ui/section-card";
 import { StatCard } from "@/components/ui/stat-card";
-import { StatusChip } from "@/components/ui/status-chip";
 import { formatCurrency } from "@/lib/utils";
 import { listBookingRequests } from "@/modules/bookings/bookings.service";
 import { listBookingsQuerySchema } from "@/modules/bookings/schemas";
+import { BOOKING_REQUEST_STATUSES } from "@/types/domain";
 
 type BookingsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -23,16 +39,19 @@ function getSearchValue(
 
 export default async function BookingsPage({ searchParams }: BookingsPageProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
+  const currentStatus = getSearchValue(resolvedSearchParams, "status");
+  const q = getSearchValue(resolvedSearchParams, "q");
   const query = listBookingsQuerySchema.parse({
     hostelBranchId: getSearchValue(resolvedSearchParams, "hostelBranchId"),
     limit: getSearchValue(resolvedSearchParams, "limit"),
     page: getSearchValue(resolvedSearchParams, "page"),
-    q: getSearchValue(resolvedSearchParams, "q"),
-    status: getSearchValue(resolvedSearchParams, "status"),
+    q,
+    status: currentStatus,
   });
   const bookings = await listBookingRequests(query);
   const rows = bookings.data;
   const pending = rows.filter((booking) => booking.status === "pending").length;
+  const contacted = rows.filter((booking) => booking.status === "contacted").length;
   const approved = rows.filter((booking) => booking.status === "approved").length;
   const rejected = rows.filter((booking) => booking.status === "rejected").length;
   const advanceCents = rows.reduce(
@@ -47,25 +66,54 @@ export default async function BookingsPage({ searchParams }: BookingsPageProps) 
     rows.find((booking) => booking.advance_amount_cents > 0)
       ?.advance_currency_code ?? "INR";
 
+  function hrefForPage(page: number): Route {
+    const params = new URLSearchParams();
+
+    if (query.q) {
+      params.set("q", query.q);
+    }
+
+    if (query.status) {
+      params.set("status", query.status);
+    }
+
+    if (query.hostelBranchId) {
+      params.set("hostelBranchId", query.hostelBranchId);
+    }
+
+    params.set("page", String(page));
+
+    return `/bookings?${params.toString()}` as Route;
+  }
+
   return (
-    <div className="space-y-6">
+    <ErpPage>
       <PageHeader
         eyebrow="Public website"
-        title="Bookings"
-        description="Review public enquiries, follow up with prospects, collect optional advances, and convert approved bookings into students."
+        title="Bookings and enquiries"
+        description="Track public booking requests from first enquiry to callback, approval, optional advance, and student admission handoff."
+        actions={
+          <Button asChild>
+            <Link href="/book" target="_blank">
+              Open public form
+            </Link>
+          </Button>
+        }
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <ErpPageGrid>
         <StatCard
           icon={CalendarClock}
-          label="Pending"
+          label="New requests"
           tone="warning"
           value={String(pending)}
+          meta={`${contacted} contacted on this page`}
         />
         <StatCard
-          icon={CalendarCheck}
-          label="Total enquiries"
+          icon={UsersRound}
+          label="Total leads"
           value={String(bookings.count)}
+          meta={`Page ${bookings.page} of ${bookings.pageCount}`}
         />
         <StatCard
           icon={CheckCircle2}
@@ -80,67 +128,71 @@ export default async function BookingsPage({ searchParams }: BookingsPageProps) 
           value={String(rejected)}
           meta={`Advance pipeline ${formatCurrency(advanceCents, currencyCode)}`}
         />
-      </div>
+      </ErpPageGrid>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent booking requests</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          {rows.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-              No booking requests match the current filters.
-            </div>
-          ) : (
-            <table className="w-full min-w-[760px] text-sm">
-              <thead className="border-b border-border text-left text-xs uppercase text-muted-foreground">
-                <tr>
-                  <th className="py-3 pr-4 font-medium">Booking</th>
-                  <th className="py-3 pr-4 font-medium">Guest</th>
-                  <th className="py-3 pr-4 font-medium">Room preference</th>
-                  <th className="py-3 pr-4 font-medium">Move-in</th>
-                  <th className="py-3 pr-4 font-medium">Advance</th>
-                  <th className="py-3 pr-4 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {rows.map((booking) => (
-                  <tr key={booking.id}>
-                    <td className="py-3 pr-4 font-medium">{booking.booking_code}</td>
-                    <td className="py-3 pr-4">
-                      <div className="font-medium">
-                        {[booking.first_name, booking.last_name]
-                          .filter(Boolean)
-                          .join(" ")}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {booking.phone}
-                      </div>
-                    </td>
-                    <td className="py-3 pr-4 text-muted-foreground">
-                      {booking.room_type?.replaceAll("_", " ") ?? "Any room"}
-                    </td>
-                    <td className="py-3 pr-4 text-muted-foreground">
-                      {booking.move_in_date ?? "Flexible"}
-                    </td>
-                    <td className="py-3 pr-4">
-                      {booking.advance_required
-                        ? formatCurrency(
-                            booking.advance_amount_cents,
-                            booking.advance_currency_code,
-                          )
-                        : "Not required"}
-                    </td>
-                    <td className="py-3 pr-4">
-                      <StatusChip status={booking.status} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+      <ActionToolbar
+        title="Lead follow-up queue"
+        description="Use this queue for first contact, approval decisions, and conversion handoff. Filters apply server-side."
+        actions={
+          <Button asChild variant="outline">
+            <Link href="/bookings">
+              <RotateCcw aria-hidden="true" />
+              Reset
+            </Link>
+          </Button>
+        }
+      >
+        <form action="/bookings" className="w-full">
+          <SearchFilterBar
+            defaultValue={query.q ?? ""}
+            placeholder="Search booking code, name, email, or phone"
+            surface="embedded"
+            actions={
+              <Button type="submit">
+                <Filter aria-hidden="true" />
+                Apply
+              </Button>
+            }
+          >
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm"
+              defaultValue={query.status ?? ""}
+              name="status"
+            >
+              <option value="">All statuses</option>
+              {BOOKING_REQUEST_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {status.replaceAll("_", " ")}
+                </option>
+              ))}
+            </select>
+          </SearchFilterBar>
+        </form>
+        {query.q || query.status ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {query.q ? <Badge variant="muted">Search: {query.q}</Badge> : null}
+            {query.status ? (
+              <Badge variant="info">Status: {query.status.replaceAll("_", " ")}</Badge>
+            ) : null}
+          </div>
+        ) : null}
+      </ActionToolbar>
+
+      <SectionCard
+        title="Booking requests"
+        description="Mobile cards keep callback actions visible for staff working from phones."
+      >
+        <BookingTable bookings={rows} />
+        <div className="mt-4 border-t border-border pt-4">
+          <PaginationControls
+            count={bookings.count}
+            hrefForPage={hrefForPage}
+            itemLabel="booking requests"
+            page={bookings.page}
+            pageCount={bookings.pageCount}
+          />
+        </div>
+      </SectionCard>
+    </ErpPage>
   );
 }

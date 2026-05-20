@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ErpPage } from "@/components/layout/erp-page";
 import { StudentForm } from "@/components/students/student-form";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -14,7 +15,7 @@ export default async function NewStudentPage() {
   const options = await getStudentFormOptions();
 
   return (
-    <section className="space-y-6">
+    <ErpPage>
       <PageHeader
         actions={
           <Button asChild variant="outline">
@@ -31,6 +32,6 @@ export default async function NewStudentPage() {
         organizationId={options.organizationId}
         rooms={options.rooms}
       />
-    </section>
+    </ErpPage>
   );
 }

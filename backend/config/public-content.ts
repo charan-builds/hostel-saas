@@ -75,6 +75,16 @@ export const publicContent = {
       icon: "car",
     },
   ],
+  facilitiesSection: {
+    badge: "Amenities",
+    title: "Everything students need for a better stay",
+    subtitle: "A hostel experience designed around safety, comfort, daily convenience, and peace of mind.",
+    cta: {
+      enabled: true,
+      label: "Enquire about rooms",
+      href: "/book",
+    },
+  },
   roomTypes: [
     {
       id: "students",
@@ -98,6 +108,16 @@ export const publicContent = {
       features: ["Less crowding", "Premium beds", "High-speed Wi-Fi", "Daily housekeeping", "Tasty Food"],
     },
   ],
+  roomShowcaseSection: {
+    badge: "Room options",
+    title: "Choose a room that fits your daily rhythm",
+    subtitle: "Showcase room choices with the comfort, cleanliness, safety, and lifestyle details residents care about.",
+    cta: {
+      enabled: true,
+      label: "Request a callback",
+      href: "/book",
+    },
+  },
   testimonials: [
     {
       quote: "The attention to detail here is incredible. It truly feels like a premium hotel.",
@@ -170,5 +190,15 @@ export const publicContent = {
     description: "Conveniently located near Loyola Polytechnic College (Diploma College) for easy access to your classes.",
     note: "We are NOT near CKG College.",
     mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15446.495034608311!2d78.2215352!3d14.4200631!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb3b13689454179%3A0xe9cc38ef877402!2sPulivendula%2C%20Andhra%20Pradesh!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
-  }
+  },
+  pageSections: [
+    { id: "hero", enabled: true, variant: "cinematic", props: {} },
+    { id: "facilities", enabled: true, variant: "premium-grid", props: {} },
+    { id: "pricing", enabled: true, variant: "cards", props: {} },
+    { id: "gallery", enabled: true, variant: "masonry", props: {} },
+    { id: "rooms", enabled: true, variant: "premium-cards", props: {} },
+    { id: "testimonials", enabled: true, variant: "slider", props: {} },
+    { id: "location", enabled: true, variant: "map", props: {} },
+    { id: "cta", enabled: true, variant: "split", props: {} }
+  ]
 };
